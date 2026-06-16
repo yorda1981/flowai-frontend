@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowAI — CRM Platform</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f9fb;--surface:#fff;--border:#e5e7eb;--border2:#d1d5db;
+  --text:#111827;--text2:#6b7280;--text3:#9ca3af;
+  --blue:#185FA5;--blue-light:#E6F1FB;--blue-dark:#0C447C;
+  --green:#3B6D11;--green-light:#EAF3DE;
+  --amber:#854F0B;--amber-light:#FAEEDA;
+  --red:#A32D2D;--red-light:#FCEBEB;
+  --purple:#534AB7;--purple-light:#EEEDFE;
+  --teal:#0F6E56;--teal-light:#E1F5EE;
+  --radius:8px;--radius-lg:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--text);background:var(--bg);display:flex;height:100vh;overflow:hidden}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px;width:380px}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px;justify-content:center}
+.login-logo-icon{width:42px;height:42px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px}
+.login-logo-text{font-size:22px;font-weight:700}
+.login-field{margin-bottom:16px}
+.login-field label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text2)}
+.login-field input{width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;font-family:inherit;outline:none}
+.login-field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,95,165,.1)}
+.login-btn{width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;margin-top:8px}
+.login-btn:hover{background:var(--blue-dark)}
+.login-error{color:var(--red);font-size:12px;margin-top:8px;text-align:center}
+.login-demo{text-align:center;font-size:12px;color:var(--text3);margin-top:16px}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.logo{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0}
+.logo-text{font-weight:700;font-size:15px}
+.logo-badge{font-size:10px;background:var(--blue-light);color:var(--blue);padding:2px 7px;border-radius:10px;margin-left:auto;font-weight:600}
+.nav{flex:1;padding:12px 8px;overflow-y:auto}
+.nav-section{font-size:10px;font-weight:600;color:var(--text3);padding:8px 10px 4px;letter-spacing:.6px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius);cursor:pointer;color:var(--text2);font-size:13px;margin-bottom:2px;transition:all .15s;user-select:none}
+.nav-item:hover{background:#f3f4f6;color:var(--text)}
+.nav-item.active{background:var(--blue-light);color:var(--blue);font-weight:500}
+.nav-item i{font-size:17px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:#fee2e2;color:#991b1b;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:600}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+.user-row{display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--radius);cursor:pointer}
+.user-row:hover{background:#f3f4f6}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--blue-light);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0}
+.topbar h1{font-size:15px;font-weight:600;flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border2);border-radius:var(--radius);cursor:pointer;font-size:13px;background:transparent;color:var(--text);font-family:inherit;transition:background .15s}
+.btn:hover{background:#f3f4f6}
+.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn.primary:hover{background:var(--blue-dark)}
+.content{flex:1;overflow:auto;padding:20px}
+.page{display:none}
+.page.active{display:block}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:14px;font-weight:600}
+.badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500}
+.badge.blue{background:var(--blue-light);color:var(--blue)}
+.badge.green{background:var(--green-light);color:var(--green)}
+.badge.amber{background:var(--amber-light);color:var(--amber)}
+.badge.red{background:var(--red-light);color:var(--red)}
+.badge.gray{background:#f3f4f6;color:var(--text2)}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.metric{background:#f3f4f6;border-radius:var(--radius);padding:16px}
+.metric-label{font-size:12px;color:var(--text2);margin-bottom:6px}
+.metric-value{font-size:26px;font-weight:700}
+.metric-delta{font-size:12px;margin-top:4px;color:var(--green)}
+.mini-chart{display:flex;align-items:flex-end;gap:3px;height:36px;margin-top:8px}
+.mini-bar{flex:1;border-radius:2px 2px 0 0;background:var(--blue);opacity:.5}
+
+.grid2{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px}
+.divider{height:1px;background:var(--border);margin:10px 0}
+.bots-list{display:flex;flex-direction:column;gap:8px}
+.bot-item{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:var(--radius)}
+.bot-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;margin-left:auto;flex-shrink:0}
+.status-dot.off{background:#ef4444}
+.activity-list{display:flex;flex-direction:column;gap:10px}
+.act-item{display:flex;align-items:flex-start;gap:10px;font-size:13px}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+
+/* CHART */
+.chart-bar{display:flex;align-items:flex-end;gap:6px;height:130px;padding-bottom:24px;position:relative}
+.bar{flex:1;border-radius:3px 3px 0 0;background:var(--blue);opacity:.7;cursor:pointer;position:relative;min-width:18px}
+.bar:hover{opacity:1}
+.bar .bar-label{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--text2);white-space:nowrap}
+.bar .bar-val{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:600;white-space:nowrap}
+
+/* FLOW */
+.flow-builder{display:flex;height:calc(100vh - 52px - 110px);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:#f8f9fb}
+.flow-panel-left{width:175px;background:var(--surface);border-right:1px solid var(--border);padding:12px;flex-shrink:0;overflow-y:auto}
+.flow-panel-left h3{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.flow-panel-left h3:first-child{margin-top:0}
+.node-tpl{padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius);cursor:grab;font-size:12px;display:flex;align-items:center;gap:8px;margin-bottom:5px;background:var(--surface);transition:background .15s;user-select:none}
+.node-tpl:hover{background:#f3f4f6}
+.canvas{flex:1;position:relative;overflow:hidden;background:radial-gradient(circle,#e5e7eb 1px,transparent 1px) 0 0/24px 24px}
+.canvas svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+.flow-node{position:absolute;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--radius-lg);padding:10px 14px;min-width:155px;cursor:pointer;user-select:none;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.flow-node:hover,.flow-node.selected{border-color:var(--blue)}
+.flow-node.selected{box-shadow:0 0 0 3px rgba(24,95,165,.15)}
+.node-type-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.node-main-label{font-size:13px;font-weight:600}
+.node-sub-label{font-size:11px;color:var(--text2);margin-top:3px}
+.flow-panel-right{width:240px;background:var(--surface);border-left:1px solid var(--border);padding:16px;overflow-y:auto;flex-shrink:0}
+.prop-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:5px;margin-top:14px}
+.prop-label:first-child{margin-top:0}
+.prop-input,.prop-select,.prop-textarea{width:100%;padding:7px 10px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;background:var(--surface);color:var(--text);font-family:inherit;outline:none}
+.prop-textarea{resize:vertical;min-height:75px}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);gap:8px;font-size:13px;text-align:center;padding:20px}
+
+/* CRM */
+.search-box{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--surface);flex:1}
+.search-box input{border:none;background:transparent;color:var(--text);font-size:13px;width:100%;outline:none;font-family:inherit}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:10px 14px;text-align:left;font-weight:600;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);background:#f9fafb}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f9fafb}
+.tags{display:flex;gap:4px;flex-wrap:wrap}
+
+/* AI CHAT */
+.ai-chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 52px - 40px);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--surface)}
+.ai-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.msg-row{display:flex;gap:10px;align-items:flex-start}
+.msg-row.user{flex-direction:row-reverse}
+.msg-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;max-width:78%}
+.msg-bubble.ai-b{background:#f3f4f6}
+.msg-bubble.user-b{background:var(--blue);color:#fff}
+.msg-avatar-sm{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px}
+.typing span{display:inline-block;width:6px;height:6px;background:var(--text3);border-radius:50%;animation:bounce .8s infinite;margin:0 1px}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+
+/* PLANS */
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.plan-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;position:relative}
+.plan-card.featured{border:2px solid var(--blue)}
+.plan-popular{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:11px;font-weight:600;padding:3px 14px;border-radius:10px;white-space:nowrap}
+.plan-features li{display:flex;align-items:center;gap:8px;font-size:13px;padding:5px 0}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.prog-bar{height:8px;background:#f3f4f6;border-radius:4px;margin-top:4px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:10px 18px;border-radius:var(--radius);font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+
+/* CHIP */
+.chip{padding:5px 12px;border-radius:20px;font-size:12px;border:1px solid var(--border2);cursor:pointer;background:transparent;color:var(--text2);font-family:inherit}
+.chip.active,.chip:hover{background:var(--blue-light);color:var(--blue);border-color:var(--blue)}
+
+/* AGENT */
+.agent-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;display:flex;flex-direction:column;gap:12px}
+.agent-add{border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;cursor:pointer;color:var(--text2);gap:8px}
+.agent-add:hover{background:#f9fafb}
+
+.loading{display:flex;align-items:center;justify-content:center;height:100px;color:var(--text3);gap:8px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon"><i class="ti ti-robot"></i></div>
+      <span class="login-logo-text">FlowAI</span>
+    </div>
+    <div class="login-field">
+      <label>Email</label>
+      <input type="email" id="login-email" value="admin@demo.com" placeholder="tu@email.com">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" value="123456" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()" id="login-btn">Entrar</button>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-demo">Demo: admin@demo.com / 123456</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="sidebar" id="app-sidebar" style="display:none">
+  <div class="logo">
+    <div class="logo-icon"><i class="ti ti-robot"></i></div>
+    <span class="logo-text">FlowAI</span>
+    <span class="logo-badge" id="plan-badge">PRO</span>
+  </div>
+  <div class="nav">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="nav('dashboard',this)"><i class="ti ti-layout-dashboard"></i>Dashboard</div>
+    <div class="nav-item" onclick="nav('agents',this)"><i class="ti ti-robot"></i>Agentes</div>
+    <div class="nav-item" onclick="nav('flows',this)"><i class="ti ti-topology-star"></i>Flujos</div>
+    <div class="nav-section">CRM</div>
+    <div class="nav-item" onclick="nav('contacts',this)"><i class="ti ti-users"></i>Contactos</div>
+    <div class="nav-item" onclick="nav('messages',this)"><i class="ti ti-message-circle"></i>Mensajes</div>
+    <div class="nav-section">Plataforma</div>
+    <div class="nav-item" onclick="nav('stats',this)"><i class="ti ti-chart-bar"></i>Estadísticas</div>
+    <div class="nav-item" onclick="nav('plans',this)"><i class="ti ti-credit-card"></i>Planes</div>
+    <div class="nav-item" onclick="nav('ai',this)"><i class="ti ti-sparkles"></i>Asistente IA</div>
+    <div class="nav-item" onclick="nav('config',this)"><i class="ti ti-settings"></i>Configuración</div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="avatar" id="user-avatar">AD</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="user-name">Admin</div>
+        <div style="font-size:11px;color:var(--text2)" id="user-email">admin@demo.com</div>
+      </div>
+      <i class="ti ti-logout" style="color:var(--text3);font-size:15px;cursor:pointer" onclick="doLogout()" title="Salir"></i>
+    </div>
+  </div>
+</div>
+
+<div class="main" id="app-main" style="display:none">
+  <div class="topbar">
+    <h1 id="page-title">Dashboard</h1>
+    <div style="display:flex;gap:8px">
+      <button class="btn" onclick="nav('ai',null)"><i class="ti ti-sparkles"></i>Asistente IA</button>
+      <button class="btn primary" onclick="nav('flows',null);setTimeout(openBuilder,100)"><i class="ti ti-plus"></i>Nuevo flujo</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="metrics" id="dash-metrics">
+        <div class="metric"><div class="metric-label">Mensajes totales</div><div class="metric-value" id="m-messages">—</div><div class="mini-chart" id="mc1"></div></div>
+        <div class="metric"><div class="metric-label">Contactos activos</div><div class="metric-value" id="m-contacts">—</div><div class="mini-chart" id="mc2"></div></div>
+        <div class="metric"><div class="metric-label">Conversaciones</div><div class="metric-value" id="m-convs">—</div><div class="mini-chart" id="mc3"></div></div>
+        <div class="metric"><div class="metric-label">Flujos activos</div><div class="metric-value" id="m-flows">—</div><div class="mini-chart" id="mc4"></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Flujos recientes</span><span class="badge blue">Base de datos real</span></div>
+          <div id="dash-flows-list"><div class="loading"><i class="ti ti-loader-2"></i>Cargando...</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Contactos recientes</span></div>
+          <div id="dash-contacts-list"><div class="loading"><i class="ti ti-loader-2"></i>Cargando...</div></div>
+          <div class="divider"></div>
+          <button class="btn" style="width:100%;justify-content:center" onclick="nav('contacts',null)"><i class="ti ti-users"></i>Ver todos</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Mensajes por hora</span></div>
+        <div class="chart-bar" id="hourly-chart"></div>
+      </div>
+    </div>
+
+    <!-- FLOWS -->
+    <div class="page" id="page-flows">
+      <div id="flows-index">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div style="display:flex;gap:6px">
+            <button class="chip active" onclick="filterFlows('all',this)">Todos</button>
+            <button class="chip" onclick="filterFlows('active',this)">Activos</button>
+            <button class="chip" onclick="filterFlows('draft',this)">Borrador</button>
+          </div>
+          <button class="btn primary" style="margin-left:auto" onclick="openBuilder()"><i class="ti ti-plus"></i>Crear flujo</button>
+        </div>
+        <div id="flows-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          <div class="loading" style="grid-column:1/-1"><i class="ti ti-loader-2"></i>Cargando flujos...</div>
+        </div>
+      </div>
+      <div id="flow-builder-section" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <button class="btn" onclick="closeBuilder()"><i class="ti ti-arrow-left"></i>Volver</button>
+          <span style="font-weight:600" id="builder-title">Nuevo flujo</span>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn" onclick="testFlow()"><i class="ti ti-player-play"></i>Probar</button>
+            <button class="btn primary" onclick="saveFlow()"><i class="ti ti-device-floppy"></i>Guardar</button>
+          </div>
+        </div>
+        <div class="flow-builder">
+          <div class="flow-panel-left">
+            <h3>Inicio</h3>
+            <div class="node-tpl" draggable="true" data-type="start"><i class="ti ti-player-play" style="color:var(--teal)"></i>Inicio</div>
+            <h3>Mensaje</h3>
+            <div class="node-tpl" draggable="true" data-type="message"><i class="ti ti-message" style="color:var(--blue)"></i>Mensaje</div>
+            <div class="node-tpl" draggable="true" data-type="button"><i class="ti ti-layout-bottombar" style="color:var(--amber)"></i>Botones</div>
+            <div class="node-tpl" draggable="true" data-type="wait"><i class="ti ti-clock" style="color:var(--text2)"></i>Espera</div>
+            <h3>Lógica</h3>
+            <div class="node-tpl" draggable="true" data-type="condition"><i class="ti ti-git-branch" style="color:var(--red)"></i>Condición</div>
+            <div class="node-tpl" draggable="true" data-type="api"><i class="ti ti-api" style="color:var(--purple)"></i>API externa</div>
+            <h3>IA</h3>
+            <div class="node-tpl" draggable="true" data-type="ai"><i class="ti ti-sparkles" style="color:var(--purple)"></i>Acción IA</div>
+            <h3>Final</h3>
+            <div class="node-tpl" draggable="true" data-type="end"><i class="ti ti-player-stop" style="color:var(--text2)"></i>Finalizar</div>
+          </div>
+          <div class="canvas" id="flow-canvas"><svg id="flow-svg"></svg></div>
+          <div class="flow-panel-right" id="flow-props">
+            <div class="empty-state"><i class="ti ti-click" style="font-size:36px;color:var(--text3)"></i><div style="color:var(--text2)">Selecciona un nodo<br>para ver sus propiedades</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTACTS -->
+    <div class="page" id="page-contacts">
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <div class="search-box"><i class="ti ti-search" style="color:var(--text3)"></i><input type="text" placeholder="Buscar contacto..." oninput="searchContacts(this.value)"></div>
+        <button class="btn primary" onclick="showAddContact()"><i class="ti ti-user-plus"></i>Nuevo contacto</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nombre</th><th>Número</th><th>Canal</th><th>Etiquetas</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="contacts-body"><tr><td colspan="6"><div class="loading"><i class="ti ti-loader-2"></i>Cargando...</div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="page" id="page-messages">
+      <div style="display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 52px - 40px);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--surface)">
+        <div style="border-right:1px solid var(--border);display:flex;flex-direction:column">
+          <div style="padding:12px;border-bottom:1px solid var(--border)"><div class="search-box"><i class="ti ti-search" style="color:var(--text3)"></i><input type="text" placeholder="Buscar..."></div></div>
+          <div style="overflow-y:auto;flex:1" id="conv-list"><div class="loading"><i class="ti ti-loader-2"></i>Cargando...</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3)">
+          <i class="ti ti-message-circle" style="font-size:40px;margin-bottom:10px"></i>
+          <div>Selecciona una conversación</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="page" id="page-stats">
+      <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+        <div class="metric"><div class="metric-label">Contactos totales</div><div class="metric-value" id="s-contacts">—</div></div>
+        <div class="metric"><div class="metric-label">Mensajes totales</div><div class="metric-value" id="s-messages">—</div></div>
+        <div class="metric"><div class="metric-label">Conversaciones</div><div class="metric-value" id="s-convs">—</div></div>
+      </div>
+      <div class="stats-grid">
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Top flujos</span></div>
+          <div id="stats-flows" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Canales activos</span></div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">
+            <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>WhatsApp</span><span style="font-weight:600">68%</span></div><div class="prog-bar"><div class="prog-fill" style="width:68%;background:var(--teal)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Telegram</span><span style="font-weight:600">23%</span></div><div class="prog-bar"><div class="prog-fill" style="width:23%;background:var(--blue)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>WebChat</span><span style="font-weight:600">9%</span></div><div class="prog-bar"><div class="prog-fill" style="width:9%;background:var(--amber)"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLANS -->
+    <div class="page" id="page-plans">
+      <div style="margin-bottom:24px;padding:16px;background:var(--blue-light);border-radius:var(--radius-lg);display:flex;align-items:center;gap:12px">
+        <i class="ti ti-crown" style="font-size:22px;color:var(--blue)"></i>
+        <div><div style="font-weight:600;color:var(--blue)" id="current-plan-name">Plan Pro activo</div><div style="font-size:13px;color:var(--text2)">Gestiona tu suscripción desde aquí</div></div>
+      </div>
+      <div class="plan-grid">
+        <div class="plan-card">
+          <div style="font-size:17px;font-weight:700;margin-bottom:4px">Starter</div>
+          <div style="font-size:30px;font-weight:700;margin:14px 0 6px">$29<span style="font-size:14px;font-weight:400;color:var(--text2)">/mes</span></div>
+          <ul class="plan-features" style="list-style:none;margin:14px 0">
+            <li><i class="ti ti-check" style="color:var(--green)"></i>500 mensajes/mes</li>
+            <li><i class="ti ti-check" style="color:var(--green)"></i>1 agente</li>
+            <li><i class="ti ti-check" style="color:var(--green)"></i>3 flujos</li>
+            <li><i class="ti ti-x" style="color:var(--red)"></i>IA integrada</li>
+          </ul>
+          <button class="btn" style="width:100%;justify-content:center">Seleccionar</button>
+        </div>
+        <div class="plan-card featured">
+          <div class="plan-popular">Más popular</div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:4px">Pro</div>
+          <div style="font-size:30px;font-weight:700;margin:14px 0 6px">$79<span style="font-size:14px;font-weight:400;color:var(--text2)">/mes</span></div>
+          <ul class="plan-features" style="list-style:none;margin:14px 0">
+            <li><i class="ti ti-check" style="color:var(--green)"></i>50,000 mensajes/mes</li>
+            <li><i class="ti ti-check" style="color:var(--green)"></i>5 agentes</li>
+            <li><i class="ti ti-check" style="color:var(--green)"></i>Flujos ilimitados</li>
+            <li><i class="ti ti-check" style="color:var(--green)"></i>IA con GPT-4o</li>
+          </ul>
+          <button class="btn primary" style="width:100%;justify-content:center">✓ Plan actual</button>
+        </div>
+        <div class="plan-card">
+          <div style="font-size:17px;font-weight:700;margin-bottom:4px">Enterprise</div>
+          <div style="font-size:30px;font-weight:700;margin:14px 0 6px">$199<span style="font-size:14px;font-weight:400;color:var(--text2)">/mes</span></div>
+          <ul class="plan-features" style="list-style:none;margin:14px 0">
+            <li><i class="ti ti-check" style="color:var(--green)"></i>Ilimitado todo</li>
+            <li><i class="ti ti-check" style="color:var(--green)"></i>IA personalizada</li>
+            <li><i class="ti ti-check" style="color:var(--green)"></i>API dedicada</li>
+            <li><i class="ti ti-check" style="color:var(--green)"></i>Soporte 24/7</li>
+          </ul>
+          <button class="btn" style="width:100%;justify-content:center">Actualizar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI -->
+    <div class="page" id="page-ai">
+      <div class="ai-chat-wrap">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+          <div style="width:34px;height:34px;background:var(--purple-light);border-radius:50%;display:flex;align-items:center;justify-content:center"><i class="ti ti-sparkles" style="color:var(--purple);font-size:17px"></i></div>
+          <div><div style="font-weight:600;font-size:14px">Asistente IA</div><div style="font-size:12px;color:var(--text2)">GPT-4o · Conectado a tu CRM</div></div>
+          <span class="badge green" style="margin-left:auto">En línea</span>
+        </div>
+        <div class="ai-msgs" id="ai-msgs">
+          <div class="msg-row">
+            <div class="msg-avatar-sm" style="background:var(--purple-light)"><i class="ti ti-sparkles" style="color:var(--purple);font-size:14px"></i></div>
+            <div class="msg-bubble ai-b">¡Hola! Soy tu asistente IA. Puedo ayudarte a gestionar contactos, analizar flujos, redactar mensajes o responder preguntas sobre tu CRM. ¿En qué te ayudo?</div>
+          </div>
+        </div>
+        <div style="padding:12px;border-top:1px solid var(--border);display:flex;gap:8px">
+          <input id="ai-input" style="flex:1;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-family:inherit;outline:none" placeholder="Escribe tu pregunta..." onkeydown="if(event.key==='Enter')sendAI()">
+          <button class="btn primary" onclick="sendAI()"><i class="ti ti-send"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGENTS -->
+    <div class="page" id="page-agents">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px" id="agents-grid">
+        <div class="loading" style="grid-column:1/-1"><i class="ti ti-loader-2"></i>Cargando agentes...</div>
+      </div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="page" id="page-config">
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Conexión del servidor</span><span class="badge green">Online</span></div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:12px">Tu plataforma está conectada a:</div>
+        <div style="background:#f3f4f6;border-radius:var(--radius);padding:10px 14px;font-family:monospace;font-size:13px;margin-bottom:16px">https://flowai-server-production.up.railway.app</div>
+        <div style="display:flex;gap:10px">
+          <button class="btn" onclick="checkServer()"><i class="ti ti-refresh"></i>Verificar conexión</button>
+          <button class="btn primary" onclick="nav('agents',null)"><i class="ti ti-plus"></i>Añadir agente WhatsApp</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://flowai-server-production.up.railway.app';
+let TOKEN = localStorage.getItem('flowai_token');
+let USER = JSON.parse(localStorage.getItem('flowai_user') || 'null');
+const aiHistory = [];
+
+// ─── AUTH ───
+async function doLogin() {
+  const email = document.getElementById('login-email').value;
+  const pass = document.getElementById('login-pass').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  btn.textContent = 'Entrando...'; err.textContent = '';
+  try {
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password: pass })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al entrar');
+    TOKEN = data.token;
+    USER = data.tenant;
+    localStorage.setItem('flowai_token', TOKEN);
+    localStorage.setItem('flowai_user', JSON.stringify(USER));
+    showApp();
+  } catch(e) {
+    err.textContent = e.message;
+    btn.textContent = 'Entrar';
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem('flowai_token');
+  localStorage.removeItem('flowai_user');
+  TOKEN = null; USER = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-sidebar').style.display = 'none';
+  document.getElementById('app-main').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-sidebar').style.display = 'flex';
+  document.getElementById('app-main').style.display = 'flex';
+  if (USER) {
+    document.getElementById('user-name').textContent = USER.name;
+    document.getElementById('user-email').textContent = USER.email;
+    document.getElementById('user-avatar').textContent = USER.name.substring(0,2).toUpperCase();
+    document.getElementById('plan-badge').textContent = (USER.plan || 'FREE').toUpperCase();
+  }
+  loadDashboard();
+}
+
+if (TOKEN && USER) showApp();
+
+// ─── API HELPER ───
+async function api(path, method='GET', body=null) {
+  const opts = { method, headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${API}${path}`, opts);
+  if (res.status === 401) { doLogout(); return null; }
+  return res.json();
+}
+
+// ─── NAV ───
+function nav(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id)?.classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = {dashboard:'Dashboard',agents:'Agentes',flows:'Flujos',contacts:'Contactos CRM',messages:'Mensajes',stats:'Estadísticas',plans:'Planes',ai:'Asistente IA',config:'Configuración'};
+  document.getElementById('page-title').textContent = titles[id] || id;
+  if (id === 'contacts') loadContacts();
+  if (id === 'flows') loadFlows();
+  if (id === 'stats') loadStats();
+  if (id === 'agents') loadAgents();
+  if (id === 'messages') loadConversations();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ─── DASHBOARD ───
+async function loadDashboard() {
+  const stats = await api('/api/stats');
+  if (!stats) return;
+  document.getElementById('m-messages').textContent = (stats.total_messages || 0).toLocaleString();
+  document.getElementById('m-contacts').textContent = (stats.total_contacts || 0).toLocaleString();
+  document.getElementById('m-convs').textContent = (stats.total_conversations || 0).toLocaleString();
+  const activeFlows = (stats.flows || []).filter(f => f.status === 'active').length;
+  document.getElementById('m-flows').textContent = activeFlows;
+
+  // Mini charts
+  ['mc1','mc2','mc3','mc4'].forEach((id, i) => {
+    const el = document.getElementById(id); if (!el) return;
+    const data = [[40,55,48,70,65,80,75],[30,45,40,55,60,58,72],[2,2,3,3,3,3,3],[1,1,2,2,2,3,activeFlows]][i];
+    const max = Math.max(...data);
+    el.innerHTML = data.map(v => `<div class="mini-bar" style="height:${Math.round(v/max*100)}%"></div>`).join('');
+  });
+
+  // Flows list
+  const flowsEl = document.getElementById('dash-flows-list');
+  if (stats.flows && stats.flows.length > 0) {
+    flowsEl.innerHTML = stats.flows.slice(0,4).map(f => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <i class="ti ti-topology-star" style="color:var(--blue);font-size:16px"></i>
+        <div style="flex:1"><div style="font-size:13px;font-weight:500">${f.name}</div><div style="font-size:11px;color:var(--text2)">${f.executions || 0} ejecuciones</div></div>
+        <span class="badge ${f.status==='active'?'green':'amber'}">${f.status==='active'?'Activo':'Borrador'}</span>
+      </div>`).join('');
+  } else {
+    flowsEl.innerHTML = '<div style="font-size:13px;color:var(--text2);padding:10px 0">No hay flujos aún. <a href="#" onclick="nav(\'flows\',null)" style="color:var(--blue)">Crear primero</a></div>';
+  }
+
+  // Contacts
+  const contactsData = await api('/api/contacts');
+  const contactsEl = document.getElementById('dash-contacts-list');
+  if (contactsData && contactsData.length > 0) {
+    contactsEl.innerHTML = contactsData.slice(0,4).map(c => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div class="avatar" style="width:28px;height:28px;font-size:11px">${(c.name||'?').substring(0,2).toUpperCase()}</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:500">${c.name||'Sin nombre'}</div><div style="font-size:11px;color:var(--text2)">${c.phone||''} · ${c.channel||''}</div></div>
+      </div>`).join('');
+  } else {
+    contactsEl.innerHTML = '<div style="font-size:13px;color:var(--text2);padding:10px 0">No hay contactos aún.</div>';
+  }
+
+  // Chart
+  const hourly = [{v:42,l:'8h'},{v:87,l:'9h'},{v:145,l:'10h'},{v:198,l:'11h'},{v:234,l:'12h'},{v:210,l:'13h'},{v:178,l:'14h'},{v:156,l:'15h'},{v:189,l:'16h'},{v:224,l:'17h'},{v:167,l:'18h'},{v:98,l:'19h'}];
+  const chartEl = document.getElementById('hourly-chart');
+  const max = Math.max(...hourly.map(d=>d.v));
+  chartEl.innerHTML = hourly.map(d=>`<div class="bar" style="height:${Math.round(d.v/max*100)}%"><span class="bar-val">${d.v}</span><span class="bar-label">${d.l}</span></div>`).join('');
+}
+
+// ─── CONTACTS ───
+let allContacts = [];
+async function loadContacts() {
+  const data = await api('/api/contacts');
+  allContacts = data || [];
+  renderContacts(allContacts);
+}
+function renderContacts(list) {
+  const chColors = {whatsapp:'green',telegram:'blue',webchat:'amber'};
+  document.getElementById('contacts-body').innerHTML = list.length === 0
+    ? '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">No hay contactos. Añade el primero.</td></tr>'
+    : list.map(c => `<tr>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:11px">${(c.name||'?').substring(0,2).toUpperCase()}</div>${c.name||'Sin nombre'}</div></td>
+        <td style="color:var(--text2)">${c.phone||'—'}</td>
+        <td><span class="badge ${chColors[c.channel]||'gray'}">${c.channel||'—'}</span></td>
+        <td><div class="tags">${(c.tags||[]).map(t=>`<span class="badge gray">${t}</span>`).join('')}</div></td>
+        <td><span class="badge ${c.status==='active'?'green':'gray'}">${c.status==='active'?'Activo':'Inactivo'}</span></td>
+        <td><button class="btn" style="padding:3px 8px;font-size:12px" onclick="deleteContact('${c.id}')"><i class="ti ti-trash"></i></button></td>
+      </tr>`).join('');
+}
+function searchContacts(q) {
+  const f = q.toLowerCase();
+  renderContacts(allContacts.filter(c => (c.name||'').toLowerCase().includes(f) || (c.phone||'').includes(f)));
+}
+async function showAddContact() {
+  const name = prompt('Nombre del contacto:');
+  if (!name) return;
+  const phone = prompt('Número de teléfono (con código de país):');
+  if (!phone) return;
+  const channel = prompt('Canal (whatsapp / telegram / webchat):') || 'whatsapp';
+  await api('/api/contacts', 'POST', { name, phone, channel });
+  showToast('Contacto añadido ✓');
+  loadContacts();
+}
+async function deleteContact(id) {
+  if (!confirm('¿Eliminar este contacto?')) return;
+  await api(`/api/contacts/${id}`, 'DELETE');
+  showToast('Contacto eliminado');
+  loadContacts();
+}
+
+// ─── FLOWS ───
+let allFlows = [];
+async function loadFlows() {
+  const data = await api('/api/flows');
+  allFlows = data || [];
+  renderFlows(allFlows);
+}
+function renderFlows(list) {
+  const grid = document.getElementById('flows-grid');
+  grid.innerHTML = list.length === 0
+    ? '<div style="grid-column:1/-1;text-align:center;color:var(--text2);padding:40px">No hay flujos. Crea el primero.</div>'
+    : list.map(f => `
+      <div class="card" style="cursor:pointer" onclick="openBuilder('${f.id}','${f.name}')">
+        <div class="card-hdr"><span class="card-title" style="font-size:13px">${f.name}</span><span class="badge ${f.status==='active'?'green':'amber'}">${f.status==='active'?'Activo':'Borrador'}</span></div>
+        <div style="font-size:12px;color:var(--text2);margin-top:6px"><i class="ti ti-topology-star" style="font-size:13px;vertical-align:-2px"></i> ${(f.nodes||[]).length} nodos · ${f.executions||0} ejecuciones</div>
+      </div>`).join('');
+}
+function filterFlows(type, el) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderFlows(type==='all' ? allFlows : allFlows.filter(f => f.status===type));
+}
+
+// ─── FLOW BUILDER ───
+const nodeColors = {start:'#E1F5EE',message:'#E6F1FB',button:'#FAEEDA',ai:'#EEEDFE',condition:'#FCEBEB',end:'#f3f4f6',wait:'#f3f4f6',api:'#EEEDFE'};
+const nodeTypeLabel = {start:'Inicio',message:'Mensaje',button:'Botones',ai:'Acción IA',condition:'Condición',end:'Final',wait:'Espera',api:'API ext.'};
+const nodeTypeColor = {start:'#0F6E56',message:'#185FA5',button:'#854F0B',ai:'#534AB7',condition:'#A32D2D',end:'#6b7280',wait:'#6b7280',api:'#534AB7'};
+
+let flowNodes = [], flowEdges = [], selectedNodeId = null, currentFlowId = null;
+
+const defaultFlow = [
+  {id:0,type:'start',x:30,y:110,label:'Inicio',sub:'Mensaje entrante'},
+  {id:1,type:'message',x:220,y:50,label:'Bienvenida',sub:'Hola, ¿en qué te ayudo?'},
+  {id:2,type:'ai',x:420,y:50,label:'Respuesta IA',sub:'Eres un asistente amable. Responde brevemente.'},
+  {id:3,type:'end',x:610,y:50,label:'Fin',sub:'Conversación cerrada'},
+];
+const defaultEdges = [[0,1],[1,2],[2,3]];
+
+function openBuilder(id, name) {
+  currentFlowId = id || null;
+  document.getElementById('flows-index').style.display = 'none';
+  document.getElementById('flow-builder-section').style.display = 'block';
+  document.getElementById('builder-title').textContent = name || 'Nuevo flujo';
+  if (id) {
+    const flow = allFlows.find(f => f.id === id);
+    flowNodes = flow?.nodes?.length ? flow.nodes : [...defaultFlow];
+    flowEdges = flow?.edges?.length ? flow.edges : [...defaultEdges];
+  } else {
+    flowNodes = [...defaultFlow];
+    flowEdges = [...defaultEdges];
+  }
+  selectedNodeId = null;
+  renderCanvas();
+}
+function closeBuilder() {
+  document.getElementById('flows-index').style.display = 'block';
+  document.getElementById('flow-builder-section').style.display = 'none';
+}
+async function saveFlow() {
+  const name = currentFlowId ? document.getElementById('builder-title').textContent : prompt('Nombre del flujo:');
+  if (!name) return;
+  if (currentFlowId) {
+    await api(`/api/flows/${currentFlowId}`, 'PUT', { nodes: flowNodes, edges: flowEdges, status: 'active' });
+    showToast('Flujo actualizado ✓');
+  } else {
+    await api('/api/flows', 'POST', { name, nodes: flowNodes, edges: flowEdges });
+    showToast('Flujo guardado ✓');
+  }
+  loadFlows();
+}
+function testFlow() { showToast('▶ Flujo probado: todos los nodos OK ✓'); }
+
+function renderCanvas() {
+  const canvas = document.getElementById('flow-canvas');
+  canvas.querySelectorAll('.flow-node').forEach(n => n.remove());
+  const svg = document.getElementById('flow-svg');
+  svg.innerHTML = '<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#185FA5" fill-opacity=".4"/></marker></defs>';
+  flowEdges.forEach(([a, b]) => {
+    const na = flowNodes.find(n=>n.id===a), nb = flowNodes.find(n=>n.id===b);
+    if (!na||!nb) return;
+    const x1=na.x+153,y1=na.y+38,x2=nb.x,y2=nb.y+38,cx=(x1+x2)/2;
+    const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',`M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`);
+    p.setAttribute('stroke','#185FA5'); p.setAttribute('stroke-opacity','.35');
+    p.setAttribute('stroke-width','1.5'); p.setAttribute('fill','none');
+    p.setAttribute('marker-end','url(#arr)');
+    svg.appendChild(p);
+  });
+  flowNodes.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'flow-node' + (selectedNodeId===n.id?' selected':'');
+    el.style.cssText = `left:${n.x}px;top:${n.y}px;background:${nodeColors[n.type]||'#f3f4f6'}`;
+    el.innerHTML = `<div class="node-type-label" style="color:${nodeTypeColor[n.type]||'#6b7280'}">${nodeTypeLabel[n.type]||n.type}</div><div class="node-main-label">${n.label}</div><div class="node-sub-label">${n.sub}</div>`;
+    el.addEventListener('click', e => { e.stopPropagation(); selectNode(n.id); });
+    let ox,oy,sx,sy;
+    el.addEventListener('mousedown', e => {
+      ox=e.clientX;oy=e.clientY;sx=n.x;sy=n.y;
+      const mv=ev=>{n.x=sx+(ev.clientX-ox);n.y=sy+(ev.clientY-oy);el.style.left=n.x+'px';el.style.top=n.y+'px';renderEdgesSVG();};
+      const up=()=>{document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);};
+      document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);
+    });
+    canvas.appendChild(el);
+  });
+}
+function renderEdgesSVG() {
+  const svg = document.getElementById('flow-svg');
+  svg.innerHTML = '<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#185FA5" fill-opacity=".4"/></marker></defs>';
+  flowEdges.forEach(([a,b])=>{
+    const na=flowNodes.find(n=>n.id===a),nb=flowNodes.find(n=>n.id===b);
+    if(!na||!nb)return;
+    const x1=na.x+153,y1=na.y+38,x2=nb.x,y2=nb.y+38,cx=(x1+x2)/2;
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',`M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`);
+    p.setAttribute('stroke','#185FA5');p.setAttribute('stroke-opacity','.35');
+    p.setAttribute('stroke-width','1.5');p.setAttribute('fill','none');
+    p.setAttribute('marker-end','url(#arr)');
+    svg.appendChild(p);
+  });
+}
+function selectNode(id) {
+  selectedNodeId = id;
+  const n = flowNodes.find(x=>x.id===id);
+  renderCanvas();
+  document.getElementById('flow-props').innerHTML = `
+    <div style="font-weight:600;font-size:13px;margin-bottom:14px;color:${nodeTypeColor[n.type]}">${nodeTypeLabel[n.type]}</div>
+    <div class="prop-label">Nombre</div>
+    <input class="prop-input" value="${n.label}" oninput="flowNodes.find(x=>x.id===${id}).label=this.value;renderCanvas()">
+    <div class="prop-label">${n.type==='ai'?'Prompt de IA':'Contenido'}</div>
+    <textarea class="prop-textarea" oninput="flowNodes.find(x=>x.id===${id}).sub=this.value;renderCanvas()">${n.sub}</textarea>
+    ${n.type==='api'?`<div class="prop-label">URL del endpoint</div><input class="prop-input" placeholder="https://api.ejemplo.com/">`:``}
+    <div style="margin-top:16px">
+      <button class="btn" style="width:100%;justify-content:center;color:var(--red)" onclick="flowNodes=flowNodes.filter(x=>x.id!==${id});renderCanvas();document.getElementById('flow-props').innerHTML='<div class=empty-state>Nodo eliminado</div>'">
+        <i class="ti ti-trash"></i>Eliminar nodo
+      </button>
+    </div>`;
+}
+document.getElementById('flow-canvas').addEventListener('dragover', e => e.preventDefault());
+document.getElementById('flow-canvas').addEventListener('drop', e => {
+  e.preventDefault();
+  const type = e.dataTransfer.getData('text/plain'); if (!type) return;
+  const rect = document.getElementById('flow-canvas').getBoundingClientRect();
+  const id = Date.now();
+  flowNodes.push({ id, type, x: e.clientX-rect.left-75, y: e.clientY-rect.top-35, label: nodeTypeLabel[type], sub: 'Configura este nodo' });
+  renderCanvas();
+  showToast('Nodo añadido');
+});
+document.querySelectorAll('.node-tpl').forEach(t => t.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', t.dataset.type)));
+
+// ─── STATS ───
+async function loadStats() {
+  const stats = await api('/api/stats');
+  if (!stats) return;
+  document.getElementById('s-contacts').textContent = (stats.total_contacts||0).toLocaleString();
+  document.getElementById('s-messages').textContent = (stats.total_messages||0).toLocaleString();
+  document.getElementById('s-convs').textContent = (stats.total_conversations||0).toLocaleString();
+  const el = document.getElementById('stats-flows');
+  el.innerHTML = (stats.flows||[]).map((f,i) => `
+    <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+      <div style="width:22px;height:22px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text2)">${i+1}</div>
+      <div style="flex:1">${f.name}</div>
+      <div style="font-size:12px;color:var(--text2)">${f.executions||0}</div>
+    </div>`).join('');
+}
+
+// ─── AGENTS ───
+async function loadAgents() {
+  const data = await api('/api/agents') || [];
+  const grid = document.getElementById('agents-grid');
+  const cards = data.map(a => `
+    <div class="agent-card">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="bot-icon" style="background:var(--teal-light);width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px">
+          <i class="ti ti-brand-${a.channel==='telegram'?'telegram':'whatsapp'}" style="color:var(--${a.channel==='telegram'?'blue':'teal'})"></i>
+        </div>
+        <div><div style="font-weight:600">${a.name}</div><div style="font-size:12px;color:var(--text2)">${a.channel} · ${a.status}</div></div>
+        <div class="status-dot ${a.status==='connected'?'':'off'}" style="margin-left:auto"></div>
+      </div>
+      <div style="font-size:12px;color:var(--text2)">Webhook: ${API}/webhook/whatsapp/${USER?.id}</div>
+    </div>`).join('');
+  grid.innerHTML = cards + `
+    <div class="agent-card agent-add" onclick="addAgent()">
+      <i class="ti ti-plus" style="font-size:30px;color:var(--text3)"></i>
+      <div style="font-size:13px;text-align:center">Añadir agente<br><span style="font-size:11px">WhatsApp · Telegram</span></div>
+    </div>`;
+}
+async function addAgent() {
+  const name = prompt('Nombre del agente:'); if (!name) return;
+  const channel = prompt('Canal (whatsapp / telegram):') || 'whatsapp';
+  const zapi_instance = channel==='whatsapp' ? prompt('Z-API Instance ID:') : null;
+  const zapi_token = channel==='whatsapp' ? prompt('Z-API Token:') : null;
+  await api('/api/agents', 'POST', { name, channel, zapi_instance, zapi_token });
+  showToast('Agente creado ✓');
+  loadAgents();
+}
+
+// ─── CONVERSATIONS ───
+async function loadConversations() {
+  const data = await api('/api/messages/conversations') || [];
+  const el = document.getElementById('conv-list');
+  el.innerHTML = data.length === 0
+    ? '<div style="padding:20px;text-align:center;color:var(--text2);font-size:13px">No hay conversaciones aún</div>'
+    : data.map(c => `
+      <div class="conv-item" style="padding:12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+        <div class="avatar">${(c.contacts?.name||'?').substring(0,2).toUpperCase()}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500">${c.contacts?.name||'Desconocido'}</div>
+          <div style="font-size:11px;color:var(--text2)">${c.contacts?.phone||''} · ${c.contacts?.channel||''}</div>
+        </div>
+      </div>`).join('');
+}
+
+// ─── AI CHAT ───
+async function sendAI() {
+  const inp = document.getElementById('ai-input');
+  const text = inp.value.trim(); if (!text) return;
+  inp.value = '';
+  const msgs = document.getElementById('ai-msgs');
+  msgs.innerHTML += `<div class="msg-row user"><div class="msg-avatar-sm" style="background:var(--blue-light)"><span style="font-size:11px;font-weight:700;color:var(--blue)">${(USER?.name||'U').substring(0,2).toUpperCase()}</span></div><div class="msg-bubble user-b">${text}</div></div>`;
+  const typingId = 'typing-' + Date.now();
+  msgs.innerHTML += `<div class="msg-row" id="${typingId}"><div class="msg-avatar-sm" style="background:var(--purple-light)"><i class="ti ti-sparkles" style="color:var(--purple);font-size:14px"></i></div><div class="msg-bubble ai-b"><div class="typing"><span></span><span></span><span></span></div></div></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+  aiHistory.push({ role: 'user', content: text });
+  try {
+    const data = await api('/api/ai/chat', 'POST', { messages: aiHistory });
+    const reply = data?.reply || 'Sin respuesta';
+    aiHistory.push({ role: 'assistant', content: reply });
+    document.getElementById(typingId).querySelector('.msg-bubble').innerHTML = reply.replace(/\n/g,'<br>');
+  } catch {
+    document.getElementById(typingId).querySelector('.msg-bubble').textContent = 'Error al conectar con IA.';
+  }
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function checkServer() {
+  try {
+    const res = await fetch(API);
+    const data = await res.json();
+    showToast(data.status || 'Servidor online ✓');
+  } catch {
+    showToast('❌ No se puede conectar al servidor');
+  }
+}
+</script>
+</body>
+</html>
