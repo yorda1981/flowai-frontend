@@ -494,19 +494,54 @@ tr:hover td{background:#f9fafb}
 
     <!-- CONFIG -->
     <div class="page" id="page-config">
+      <!-- USO DE TOKENS -->
       <div class="card" style="margin-bottom:16px">
-        <div class="card-hdr"><span class="card-title">Tu API Key de IA (opcional)</span></div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:12px">Conecta tu propia clave de OpenAI para usar IA en tus flujos.</div>
-        <div style="display:flex;gap:8px">
-          <input id="openai-key" style="flex:1;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-family:inherit;outline:none" placeholder="sk-...tu clave de OpenAI...">
-          <button class="btn primary" onclick="saveOpenAIKey()"><i class="ti ti-device-floppy"></i>Guardar</button>
+        <div class="card-hdr"><span class="card-title">Créditos de IA</span><span class="badge" id="token-badge">Cargando...</span></div>
+        <div id="token-info" style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+            <span style="color:var(--text2)">Tokens usados</span>
+            <span style="font-weight:600"><span id="tokens-used">—</span> / <span id="tokens-limit">—</span></span>
+          </div>
+          <div style="height:10px;background:#f3f4f6;border-radius:5px;overflow:hidden">
+            <div id="token-bar" style="height:100%;background:var(--blue);border-radius:5px;width:0%;transition:width .5s"></div>
+          </div>
+          <div style="font-size:12px;color:var(--text2);margin-top:6px" id="token-msg"></div>
+        </div>
+        <div id="own-key-section" style="display:none">
+          <div style="background:var(--amber-light);border-radius:var(--radius);padding:10px 14px;font-size:13px;color:var(--amber);margin-bottom:12px">
+            <i class="ti ti-alert-triangle" style="font-size:15px;vertical-align:-2px"></i>
+            <strong>Créditos agotados.</strong> Conecta tu propia API key de OpenAI para continuar usando IA sin límites.
+          </div>
+        </div>
+        <div id="has-own-key" style="display:none">
+          <div style="background:var(--green-light);border-radius:var(--radius);padding:10px 14px;font-size:13px;color:var(--green);margin-bottom:12px">
+            <i class="ti ti-check" style="font-size:15px;vertical-align:-2px"></i>
+            Usando tu propia API key. <strong>Sin límites de tokens.</strong>
+          </div>
         </div>
       </div>
+
+      <!-- API KEY -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hdr"><span class="card-title">Tu API Key de OpenAI</span></div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:12px">
+          Conecta tu propia clave para usar IA sin límites. Obtén una en <a href="https://platform.openai.com" target="_blank" style="color:var(--blue)">platform.openai.com</a>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input id="openai-key" type="password" style="flex:1;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-family:inherit;outline:none" placeholder="sk-...tu clave de OpenAI...">
+          <button class="btn" onclick="toggleKeyVisibility()" style="padding:8px 10px"><i class="ti ti-eye" id="eye-icon"></i></button>
+          <button class="btn primary" onclick="saveOpenAIKey()" id="save-key-btn"><i class="ti ti-device-floppy"></i>Guardar</button>
+        </div>
+        <div style="font-size:12px;color:var(--text3);margin-top:8px">Tu clave se guarda de forma segura y nunca es compartida.</div>
+      </div>
+
+      <!-- SERVIDOR -->
       <div class="card">
         <div class="card-hdr"><span class="card-title">Servidor</span><span class="badge green">Online</span></div>
-        <div style="background:#f3f4f6;border-radius:var(--radius);padding:10px 14px;font-family:monospace;font-size:13px">https://flowai-server-production.up.railway.app</div>
+        <div style="background:#f3f4f6;border-radius:var(--radius);padding:10px 14px;font-family:monospace;font-size:12px">https://flowai-server-production.up.railway.app</div>
       </div>
     </div>
+
 
   </div>
 </div>
@@ -642,6 +677,7 @@ function nav(id, el) {
   if (id==='stats') loadStats();
   if (id==='agents') loadAgents();
   if (id==='messages') loadConversations();
+  if (id==='config') loadTokenUsage();
 }
 
 function showToast(msg) {
@@ -844,11 +880,71 @@ async function sendAI(){
   msgs.scrollTop=msgs.scrollHeight;
 }
 
-function saveOpenAIKey(){
-  const key=document.getElementById('openai-key').value.trim();
-  if(!key){showToast('Ingresa tu API key');return;}
-  localStorage.setItem('openai_key',key);
-  showToast('API key guardada ✓');
+// ─── CONFIG / TOKENS ───
+async function loadTokenUsage() {
+  const data = await api('/api/ai/usage');
+  if (!data) return;
+  
+  document.getElementById('tokens-used').textContent = (data.tokens_used||0).toLocaleString();
+  document.getElementById('tokens-limit').textContent = (data.tokens_limit||0).toLocaleString();
+  
+  const bar = document.getElementById('token-bar');
+  const pct = data.percentage || 0;
+  bar.style.width = pct + '%';
+  bar.style.background = pct >= 90 ? '#E24B4A' : pct >= 70 ? '#BA7517' : '#185FA5';
+  
+  const badge = document.getElementById('token-badge');
+  const msg = document.getElementById('token-msg');
+  
+  if (data.has_own_key) {
+    badge.textContent = 'API Key propia ✓';
+    badge.className = 'badge green';
+    document.getElementById('has-own-key').style.display = 'block';
+    document.getElementById('own-key-section').style.display = 'none';
+    msg.textContent = 'Usando tu propia API key sin límites.';
+  } else if (pct >= 100) {
+    badge.textContent = 'Agotado';
+    badge.className = 'badge red';
+    document.getElementById('own-key-section').style.display = 'block';
+    msg.textContent = 'Tokens agotados. Conecta tu API key para continuar.';
+  } else if (pct >= 70) {
+    badge.textContent = pct + '% usado';
+    badge.className = 'badge amber';
+    msg.textContent = `Te quedan ${(data.tokens_remaining||0).toLocaleString()} tokens este mes.`;
+  } else {
+    badge.textContent = pct + '% usado';
+    badge.className = 'badge blue';
+    msg.textContent = `Te quedan ${(data.tokens_remaining||0).toLocaleString()} tokens este mes.`;
+  }
+}
+
+async function saveOpenAIKey() {
+  const key = document.getElementById('openai-key').value.trim();
+  if (!key) { showToast('Ingresa tu API key'); return; }
+  const btn = document.getElementById('save-key-btn');
+  btn.textContent = 'Verificando...'; btn.disabled = true;
+  try {
+    const data = await api('/api/ai/save-key', 'POST', { openai_api_key: key });
+    if (data?.success) {
+      showToast('✓ API key guardada. Ahora usas tu propia IA sin límites.');
+      loadTokenUsage();
+    } else {
+      showToast('❌ ' + (data?.error || 'Error al guardar'));
+    }
+  } catch { showToast('❌ Error al conectar'); }
+  btn.innerHTML = '<i class="ti ti-device-floppy"></i>Guardar'; btn.disabled = false;
+}
+
+function toggleKeyVisibility() {
+  const inp = document.getElementById('openai-key');
+  const icon = document.getElementById('eye-icon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    icon.className = 'ti ti-eye-off';
+  } else {
+    inp.type = 'password';
+    icon.className = 'ti ti-eye';
+  }
 }
 </script>
 </body>
