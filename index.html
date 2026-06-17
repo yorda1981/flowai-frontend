@@ -494,7 +494,6 @@ tr:hover td{background:#f9fafb}
 
     <!-- CONFIG -->
     <div class="page" id="page-config">
-      <!-- USO DE TOKENS -->
       <div class="card" style="margin-bottom:16px">
         <div class="card-hdr"><span class="card-title">Créditos de IA</span><span class="badge" id="token-badge">Cargando...</span></div>
         <div id="token-info" style="margin-bottom:12px">
@@ -520,8 +519,6 @@ tr:hover td{background:#f9fafb}
           </div>
         </div>
       </div>
-
-      <!-- API KEY -->
       <div class="card" style="margin-bottom:16px">
         <div class="card-hdr"><span class="card-title">Tu API Key de OpenAI</span></div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:12px">
@@ -534,14 +531,11 @@ tr:hover td{background:#f9fafb}
         </div>
         <div style="font-size:12px;color:var(--text3);margin-top:8px">Tu clave se guarda de forma segura y nunca es compartida.</div>
       </div>
-
-      <!-- SERVIDOR -->
       <div class="card">
         <div class="card-hdr"><span class="card-title">Servidor</span><span class="badge green">Online</span></div>
         <div style="background:#f3f4f6;border-radius:var(--radius);padding:10px 14px;font-family:monospace;font-size:12px">https://flowai-server-production.up.railway.app</div>
       </div>
     </div>
-
 
   </div>
 </div>
@@ -555,7 +549,6 @@ let USER = JSON.parse(localStorage.getItem('flowai_user') || 'null');
 let selectedPlan = 'starter';
 const aiHistory = [];
 
-// ─── SCREENS ───
 function showScreen(name) {
   document.getElementById('screen-login').classList.toggle('hidden', name !== 'login');
   document.getElementById('screen-register').classList.toggle('hidden', name !== 'register');
@@ -573,7 +566,6 @@ function quickDemo() {
   doLogin();
 }
 
-// ─── LOGIN ───
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value;
@@ -598,7 +590,6 @@ async function doLogin() {
   btn.textContent = 'Entrar'; btn.disabled = false;
 }
 
-// ─── REGISTRO ───
 async function doRegister() {
   const name = document.getElementById('reg-name').value.trim();
   const email = document.getElementById('reg-email').value.trim();
@@ -626,7 +617,6 @@ async function doRegister() {
   btn.textContent = 'Crear cuenta'; btn.disabled = false;
 }
 
-// ─── APP ───
 function showApp() {
   showScreen('none');
   document.getElementById('app-sidebar').style.display = 'flex';
@@ -655,7 +645,6 @@ function doLogout() {
 if (TOKEN && USER) showApp();
 else showScreen('login');
 
-// ─── API HELPER ───
 async function api(path, method='GET', body=null) {
   const opts = { method, headers: {'Authorization':`Bearer ${TOKEN}`,'Content-Type':'application/json'} };
   if (body) opts.body = JSON.stringify(body);
@@ -664,7 +653,6 @@ async function api(path, method='GET', body=null) {
   return res.json();
 }
 
-// ─── NAV ───
 function nav(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -686,7 +674,6 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ─── DASHBOARD ───
 async function loadDashboard() {
   const stats = await api('/api/stats'); if (!stats) return;
   document.getElementById('m-messages').textContent = (stats.total_messages||0).toLocaleString();
@@ -713,7 +700,6 @@ async function loadDashboard() {
   document.getElementById('hourly-chart').innerHTML=hourly.map(d=>`<div class="bar" style="height:${Math.round(d.v/max*100)}%"><span class="bar-val">${d.v}</span><span class="bar-label">${d.l}</span></div>`).join('');
 }
 
-// ─── CONTACTS ───
 let allContacts=[];
 async function loadContacts(){
   const data=await api('/api/contacts'); allContacts=data||[]; renderContacts(allContacts);
@@ -738,7 +724,6 @@ async function deleteContact(id){
   showToast('Contacto eliminado'); loadContacts();
 }
 
-// ─── FLOWS ───
 let allFlows=[];
 async function loadFlows(){const data=await api('/api/flows');allFlows=data||[];renderFlows(allFlows);}
 function renderFlows(list){
@@ -752,7 +737,6 @@ function filterFlows(type,el){
   renderFlows(type==='all'?allFlows:allFlows.filter(f=>f.status===type));
 }
 
-// ─── FLOW BUILDER ───
 const nodeColors={start:'#E1F5EE',message:'#E6F1FB',button:'#FAEEDA',ai:'#EEEDFE',condition:'#FCEBEB',end:'#f3f4f6',wait:'#f3f4f6',api:'#EEEDFE'};
 const nodeTypeLabel={start:'Inicio',message:'Mensaje',button:'Botones',ai:'Acción IA',condition:'Condición',end:'Final',wait:'Espera',api:'API ext.'};
 const nodeTypeColor={start:'#0F6E56',message:'#185FA5',button:'#854F0B',ai:'#534AB7',condition:'#A32D2D',end:'#6b7280',wait:'#6b7280',api:'#534AB7'};
@@ -831,7 +815,6 @@ document.getElementById('flow-canvas').addEventListener('drop',e=>{
 });
 document.querySelectorAll('.node-tpl').forEach(t=>t.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',t.dataset.type)));
 
-// ─── STATS ───
 async function loadStats(){
   const stats=await api('/api/stats');if(!stats)return;
   document.getElementById('s-contacts').textContent=(stats.total_contacts||0).toLocaleString();
@@ -840,7 +823,7 @@ async function loadStats(){
   document.getElementById('stats-flows').innerHTML=(stats.flows||[]).map((f,i)=>`<div style="display:flex;align-items:center;gap:10px;font-size:13px"><div style="width:22px;height:22px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text2)">${i+1}</div><div style="flex:1">${f.name}</div><div style="font-size:12px;color:var(--text2)">${f.executions||0}</div></div>`).join('');
 }
 
-// ─── AGENTS ───
+// ─── AGENTS (MODIFICADO: botón Verificar siempre visible) ───
 async function loadAgents(){
   const data=await api('/api/agents')||[];
   const grid=document.getElementById('agents-grid');
@@ -854,14 +837,15 @@ async function loadAgents(){
           <div style="font-weight:600">${a.name}</div>
           <div style="font-size:12px;color:var(--text2)">WhatsApp · <span id="status-${a.id}" style="color:${a.status==='connected'?'var(--green)':'var(--red)'}">${a.status==='connected'?'Conectado':'Desconectado'}</span></div>
         </div>
-        <div class="status-dot ${a.status==='connected'?'':'off'}"></div>
+        <div class="status-dot ${a.status==='connected'?'':'off'}" id="dot-${a.id}"></div>
       </div>
       <div id="qr-${a.id}"></div>
-      <div style="display:flex;gap:6px;margin-top:4px">
+      <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
         ${a.status==='connected'
           ?`<button class="btn" style="flex:1;justify-content:center;font-size:12px;color:var(--red)" onclick="disconnectAgent('${a.id}')"><i class="ti ti-unlink"></i>Desconectar</button>`
           :`<button class="btn primary" style="flex:1;justify-content:center;font-size:12px" onclick="showQR('${a.id}')"><i class="ti ti-qrcode"></i>Conectar WhatsApp</button>`
         }
+        <button class="btn" style="flex:1;justify-content:center;font-size:12px" onclick="checkStatus('${a.id}')"><i class="ti ti-refresh"></i>Verificar</button>
         <button class="btn" style="font-size:12px;color:var(--red);padding:6px 10px" onclick="deleteAgent('${a.id}')"><i class="ti ti-trash"></i></button>
       </div>
     </div>`).join('')+`
@@ -888,8 +872,19 @@ async function showQR(agentId){
         <div style="text-align:center;padding:12px;background:#f9fafb;border-radius:8px;margin:10px 0">
           <img src="${data.base64}" style="width:200px;height:200px;border-radius:8px">
           <div style="font-size:12px;color:var(--text2);margin-top:8px">Escanea con WhatsApp → Dispositivos vinculados</div>
-          <button class="btn" style="margin-top:8px;font-size:12px" onclick="checkStatus('${agentId}')"><i class="ti ti-refresh"></i>Verificar conexión</button>
         </div>`;
+      // Auto-verificar cada 5 segundos hasta conectar
+      let tries = 0;
+      const interval = setInterval(async () => {
+        tries++;
+        const st = await api('/api/agents/'+agentId+'/status');
+        if(st?.status==='connected'){
+          clearInterval(interval);
+          showToast('✅ WhatsApp conectado exitosamente!');
+          loadAgents();
+        }
+        if(tries >= 12) clearInterval(interval); // parar después de 1 minuto
+      }, 5000);
     } else if(data?.code){
       qrDiv.innerHTML=`
         <div style="text-align:center;padding:12px;background:#f9fafb;border-radius:8px;margin:10px 0">
@@ -897,7 +892,7 @@ async function showQR(agentId){
           <div style="font-size:12px;color:var(--text2);margin-top:6px">Copia este código en WhatsApp → Vincular dispositivo</div>
         </div>`;
     } else {
-      qrDiv.innerHTML=`<div style="font-size:13px;color:var(--text2);padding:10px;text-align:center">Ya está conectado o generando. <button class="btn" style="font-size:12px" onclick="checkStatus('${agentId}')">Verificar</button></div>`;
+      qrDiv.innerHTML=`<div style="font-size:13px;color:var(--text2);padding:10px;text-align:center">Generando QR... presiona Verificar cuando hayas escaneado.</div>`;
     }
   } catch(e) {
     qrDiv.innerHTML=`<div style="font-size:13px;color:var(--red);padding:10px">Error al obtener QR. Intenta de nuevo.</div>`;
@@ -905,12 +900,13 @@ async function showQR(agentId){
 }
 
 async function checkStatus(agentId){
+  showToast('Verificando conexión...');
   const data=await api('/api/agents/'+agentId+'/status');
   if(data?.status==='connected'){
     showToast('✅ WhatsApp conectado exitosamente!');
     loadAgents();
   } else {
-    showToast('Aún no conectado. Escanea el QR e intenta de nuevo.');
+    showToast('⏳ Aún no conectado. Escanea el QR e intenta de nuevo.');
   }
 }
 
@@ -926,7 +922,6 @@ async function deleteAgent(agentId){
   showToast('Agente eliminado');loadAgents();
 }
 
-// ─── CONVERSATIONS ───
 async function loadConversations(){
   const data=await api('/api/messages/conversations')||[];
   document.getElementById('conv-list').innerHTML=data.length===0
@@ -934,7 +929,6 @@ async function loadConversations(){
     :data.map(c=>`<div style="padding:12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px" onmouseenter="this.style.background='#f3f4f6'" onmouseleave="this.style.background=''"><div class="avatar">${(c.contacts?.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">${c.contacts?.name||'Desconocido'}</div><div style="font-size:11px;color:var(--text2)">${c.contacts?.phone||''}</div></div></div>`).join('');
 }
 
-// ─── AI ───
 async function sendAI(){
   const inp=document.getElementById('ai-input');const text=inp.value.trim();if(!text)return;
   inp.value='';const msgs=document.getElementById('ai-msgs');
@@ -952,22 +946,17 @@ async function sendAI(){
   msgs.scrollTop=msgs.scrollHeight;
 }
 
-// ─── CONFIG / TOKENS ───
 async function loadTokenUsage() {
   const data = await api('/api/ai/usage');
   if (!data) return;
-  
   document.getElementById('tokens-used').textContent = (data.tokens_used||0).toLocaleString();
   document.getElementById('tokens-limit').textContent = (data.tokens_limit||0).toLocaleString();
-  
   const bar = document.getElementById('token-bar');
   const pct = data.percentage || 0;
   bar.style.width = pct + '%';
   bar.style.background = pct >= 90 ? '#E24B4A' : pct >= 70 ? '#BA7517' : '#185FA5';
-  
   const badge = document.getElementById('token-badge');
   const msg = document.getElementById('token-msg');
-  
   if (data.has_own_key) {
     badge.textContent = 'API Key propia ✓';
     badge.className = 'badge green';
