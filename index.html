@@ -5,14 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FlowAI — CRM Platform</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-<script type="text/javascript">
+<script>
 function googleTranslateElementInit(){
-  new google.translate.TranslateElement({
-    pageLanguage:'es',
-    includedLanguages:'es,en,pt,fr,de,it,ar,zh-CN,ja,ko,ru',
-    layout:google.translate.TranslateElement.InlineLayout.SIMPLE,
-    autoDisplay:false
-  },'google_translate_element');
+  new google.translate.TranslateElement({pageLanguage:'es',includedLanguages:'es,en,pt,fr,de,it,ar,zh-CN,ja,ru',autoDisplay:false},'gte');
 }
 </script>
 <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
@@ -39,14 +34,11 @@ body.dark{
   --purple:#7c71e8;--purple-light:#1e1d3d;
   --teal:#1a9e7a;--teal-light:#0d2820;
 }
-/* Google Translate hide banner */
-.goog-te-banner-frame{display:none!important}
+/* Lang selector */
+.lang-select{padding:5px 8px;border:1px solid var(--border2);border-radius:var(--radius);font-size:12px;background:var(--surface);color:var(--text);outline:none;cursor:pointer;font-family:inherit}
+/* Hide Google Translate bar */
+.goog-te-banner-frame,.skiptranslate{display:none!important}
 body{top:0!important}
-.goog-te-gadget{font-size:0!important}
-.goog-te-gadget select{font-size:12px!important;padding:4px 6px!important;border:1px solid var(--border2)!important;border-radius:var(--radius)!important;background:var(--surface)!important;color:var(--text)!important;outline:none!important;cursor:pointer}
-#google_translate_element{display:inline-flex;align-items:center}
-.skiptranslate{display:none!important}
-
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--text);background:var(--bg);display:flex;height:100vh;overflow:hidden}
 
 /* AUTH SCREENS */
@@ -320,8 +312,21 @@ tr:hover td{background:#f9fafb}
   <div class="topbar">
     <h1 id="page-title">Dashboard</h1>
     <div style="display:flex;gap:8px;align-items:center">
-      <div id="google_translate_element"></div>
-      <button class="btn" onclick="toggleDark()" id="dark-btn" title="Modo oscuro"><i class="ti ti-moon" id="dark-icon"></i></button>
+      <!-- Selector de idioma visible -->
+      <select class="lang-select" onchange="changeLang(this.value)" id="lang-select" title="Idioma">
+        <option value="es">🌐 ES</option>
+        <option value="en">🌐 EN</option>
+        <option value="pt">🌐 PT</option>
+        <option value="fr">🌐 FR</option>
+        <option value="de">🌐 DE</option>
+        <option value="it">🌐 IT</option>
+        <option value="ar">🌐 AR</option>
+        <option value="zh-CN">🌐 ZH</option>
+        <option value="ja">🌐 JA</option>
+        <option value="ru">🌐 RU</option>
+      </select>
+      <div id="gte" style="display:none"></div>
+      <button class="btn" onclick="toggleDark()" id="dark-btn" title="Modo oscuro / claro"><i class="ti ti-moon" id="dark-icon"></i></button>
       <button class="btn" onclick="nav('ai',null)"><i class="ti ti-sparkles"></i>Asistente IA</button>
       <button class="btn primary" onclick="nav('flows',null);setTimeout(openBuilder,100)"><i class="ti ti-plus"></i>Nuevo flujo</button>
     </div>
@@ -1566,18 +1571,34 @@ function toggleKeyVisibility() {
   }
 }
 function toggleDark(){
-  const dark = document.body.classList.toggle('dark');
-  localStorage.setItem('flowai-dark', dark ? '1' : '0');
-  const icon = document.getElementById('dark-icon');
-  icon.className = dark ? 'ti ti-sun' : 'ti ti-moon';
+  const dark=document.body.classList.toggle('dark');
+  localStorage.setItem('flowai-dark', dark?'1':'0');
+  document.getElementById('dark-icon').className=dark?'ti ti-sun':'ti ti-moon';
 }
-// Restore dark mode preference on load
+
+function changeLang(lang){
+  localStorage.setItem('flowai-lang', lang);
+  // Use Google Translate cookie method
+  const domain=location.hostname==='localhost'?'localhost':'.'+location.hostname.split('.').slice(-2).join('.');
+  document.cookie=`googtrans=/es/${lang};path=/;domain=${domain}`;
+  document.cookie=`googtrans=/es/${lang};path=/`;
+  location.reload();
+}
+
+// Init preferences on load
 (function(){
   if(localStorage.getItem('flowai-dark')==='1'){
     document.body.classList.add('dark');
     document.addEventListener('DOMContentLoaded',()=>{
       const icon=document.getElementById('dark-icon');
       if(icon) icon.className='ti ti-sun';
+    });
+  }
+  const lang=localStorage.getItem('flowai-lang');
+  if(lang){
+    document.addEventListener('DOMContentLoaded',()=>{
+      const sel=document.getElementById('lang-select');
+      if(sel) sel.value=lang;
     });
   }
 })();
