@@ -387,13 +387,37 @@ tr:hover td{background:#f9fafb}
     <!-- MESSAGES -->
     <div class="page" id="page-messages">
       <div style="display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 52px - 40px);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--surface)">
+        <!-- Lista de conversaciones -->
         <div style="border-right:1px solid var(--border);display:flex;flex-direction:column">
-          <div style="padding:12px;border-bottom:1px solid var(--border)"><div class="search-box"><i class="ti ti-search" style="color:var(--text3)"></i><input type="text" placeholder="Buscar..."></div></div>
+          <div style="padding:12px;border-bottom:1px solid var(--border)">
+            <div class="search-box"><i class="ti ti-search" style="color:var(--text3)"></i><input type="text" placeholder="Buscar..." oninput="searchConvs(this.value)"></div>
+          </div>
           <div style="overflow-y:auto;flex:1" id="conv-list"><div class="loading"><i class="ti ti-loader-2"></i>Cargando...</div></div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3)">
-          <i class="ti ti-message-circle" style="font-size:40px;margin-bottom:10px"></i>
-          <div>Selecciona una conversación</div>
+        <!-- Panel de chat -->
+        <div style="display:flex;flex-direction:column;" id="chat-panel">
+          <div id="chat-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3)">
+            <i class="ti ti-message-circle" style="font-size:40px;margin-bottom:10px"></i>
+            <div>Selecciona una conversación</div>
+          </div>
+          <div id="chat-active" style="display:none;flex-direction:column;height:100%">
+            <!-- Header del chat -->
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface)">
+              <div class="avatar" id="chat-avatar">?</div>
+              <div>
+                <div style="font-size:13px;font-weight:600" id="chat-name">—</div>
+                <div style="font-size:11px;color:var(--text2)" id="chat-phone">—</div>
+              </div>
+              <span class="badge green" style="margin-left:auto" id="chat-status">Bot activo</span>
+            </div>
+            <!-- Mensajes -->
+            <div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;background:#f0f2f5" id="chat-messages"></div>
+            <!-- Input (solo visual, sin envío por ahora) -->
+            <div style="padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--surface)">
+              <input id="chat-input" style="flex:1;padding:8px 12px;border:1px solid var(--border2);border-radius:20px;font-size:13px;font-family:inherit;outline:none" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter')sendManualMsg()">
+              <button class="btn primary" onclick="sendManualMsg()" style="border-radius:50%;width:36px;height:36px;padding:0;justify-content:center"><i class="ti ti-send"></i></button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -942,11 +966,99 @@ async function deleteAgent(agentId){
   showToast('Agente eliminado');loadAgents();
 }
 
+let allConvs = [];
+let activeConvId = null;
+
 async function loadConversations(){
-  const data=await api('/api/messages/conversations')||[];
-  document.getElementById('conv-list').innerHTML=data.length===0
-    ?'<div style="padding:20px;text-align:center;color:var(--text2);font-size:13px">No hay conversaciones aún</div>'
-    :data.map(c=>`<div style="padding:12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px" onmouseenter="this.style.background='#f3f4f6'" onmouseleave="this.style.background=''"><div class="avatar">${(c.contacts?.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">${c.contacts?.name||'Desconocido'}</div><div style="font-size:11px;color:var(--text2)">${c.contacts?.phone||''}</div></div></div>`).join('');
+  const data = await api('/api/messages/conversations') || [];
+  allConvs = data;
+  renderConvList(data);
+}
+
+function renderConvList(data) {
+  document.getElementById('conv-list').innerHTML = data.length === 0
+    ? '<div style="padding:20px;text-align:center;color:var(--text2);font-size:13px">No hay conversaciones aún</div>'
+    : data.map(c => `
+      <div id="conv-item-${c.id}" onclick="openConv('${c.id}','${(c.contacts?.name||'?').replace(/'/g,"\\'")}','${c.contacts?.phone||''}','${c.status||'bot'}')"
+        style="padding:12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;transition:background .15s"
+        onmouseenter="this.style.background='#f3f4f6'" onmouseleave="this.style.background=activeConvId==='${c.id}'?'#e8f0fb':''">
+        <div class="avatar">${(c.contacts?.name||'?').substring(0,2).toUpperCase()}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500">${c.contacts?.name||'Desconocido'}</div>
+          <div style="font-size:11px;color:var(--text2)">${c.contacts?.phone||''}</div>
+        </div>
+        <span class="badge ${c.status==='open'?'green':c.status==='bot'?'blue':'gray'}" style="font-size:10px">${c.status||'bot'}</span>
+      </div>`).join('');
+}
+
+function searchConvs(q) {
+  const filtered = allConvs.filter(c =>
+    (c.contacts?.name||'').toLowerCase().includes(q.toLowerCase()) ||
+    (c.contacts?.phone||'').includes(q)
+  );
+  renderConvList(filtered);
+}
+
+async function openConv(convId, name, phone, status) {
+  activeConvId = convId;
+  // Highlight selected
+  document.querySelectorAll('[id^="conv-item-"]').forEach(el => el.style.background = '');
+  const item = document.getElementById('conv-item-' + convId);
+  if (item) item.style.background = '#e8f0fb';
+
+  // Mostrar panel chat
+  document.getElementById('chat-empty').style.display = 'none';
+  const active = document.getElementById('chat-active');
+  active.style.display = 'flex';
+
+  // Header
+  document.getElementById('chat-avatar').textContent = name.substring(0,2).toUpperCase();
+  document.getElementById('chat-name').textContent = name;
+  document.getElementById('chat-phone').textContent = phone;
+  document.getElementById('chat-status').textContent = status === 'bot' ? 'Bot activo' : status === 'open' ? 'Abierta' : 'Cerrada';
+  document.getElementById('chat-status').className = 'badge ' + (status==='bot'?'blue':status==='open'?'green':'gray');
+
+  // Cargar mensajes
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;padding:10px">Cargando mensajes...</div>';
+
+  const data = await api('/api/messages/conversation/' + convId) || [];
+
+  if (data.length === 0) {
+    msgs.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;padding:20px">No hay mensajes aún</div>';
+    return;
+  }
+
+  msgs.innerHTML = data.map(m => {
+    const isOut = m.direction === 'outbound';
+    const time = new Date(m.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+    return `
+      <div style="display:flex;justify-content:${isOut?'flex-end':'flex-start'}">
+        <div style="max-width:70%;padding:8px 12px;border-radius:${isOut?'12px 12px 2px 12px':'12px 12px 12px 2px'};background:${isOut?'#dcf8c6':'#fff'};box-shadow:0 1px 2px rgba(0,0,0,.1);font-size:13px;line-height:1.5">
+          ${m.content}
+          <div style="font-size:10px;color:${isOut?'#6b9e6b':'var(--text3)'};text-align:right;margin-top:3px">${time} ${isOut?'<i class="ti ti-checks" style="font-size:11px"></i>':''}</div>
+        </div>
+      </div>`;
+  }).join('');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function sendManualMsg() {
+  const inp = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if (!text || !activeConvId) return;
+  inp.value = '';
+  // Por ahora solo muestra el mensaje visualmente
+  const msgs = document.getElementById('chat-messages');
+  const time = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  msgs.innerHTML += `
+    <div style="display:flex;justify-content:flex-end">
+      <div style="max-width:70%;padding:8px 12px;border-radius:12px 12px 2px 12px;background:#dcf8c6;box-shadow:0 1px 2px rgba(0,0,0,.1);font-size:13px;line-height:1.5">
+        ${text}
+        <div style="font-size:10px;color:#6b9e6b;text-align:right;margin-top:3px">${time} <i class="ti ti-checks" style="font-size:11px"></i></div>
+      </div>
+    </div>`;
+  msgs.scrollTop = msgs.scrollHeight;
 }
 
 async function sendAI(){
