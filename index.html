@@ -1212,11 +1212,18 @@ async function deleteAgent(agentId){
 
 let allConvs = [];
 let activeConvId = null;
+let activePhone = null;
 
 async function loadConversations(){
   const data = await api('/api/messages/conversations') || [];
-  allConvs = data;
-  renderConvList(data);
+  // Deduplicar por teléfono — quedarse con la más reciente
+  const seen = new Map();
+  data.forEach(c => {
+    const phone = c.contacts?.phone || c.id;
+    if (!seen.has(phone)) seen.set(phone, c);
+  });
+  allConvs = Array.from(seen.values());
+  renderConvList(allConvs);
 }
 
 function renderConvList(data) {
@@ -1245,6 +1252,7 @@ function searchConvs(q) {
 
 async function openConv(convId, name, phone, status) {
   activeConvId = convId;
+  activePhone = phone;
   // Highlight selected
   document.querySelectorAll('[id^="conv-item-"]').forEach(el => el.style.background = '');
   const item = document.getElementById('conv-item-' + convId);
@@ -1290,19 +1298,35 @@ async function openConv(convId, name, phone, status) {
 async function sendManualMsg() {
   const inp = document.getElementById('chat-input');
   const text = inp.value.trim();
-  if (!text || !activeConvId) return;
+  if (!text || !activeConvId || !activePhone) return;
   inp.value = '';
-  // Por ahora solo muestra el mensaje visualmente
+  inp.disabled = true;
+
+  // Mostrar mensaje optimisticamente
   const msgs = document.getElementById('chat-messages');
   const time = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  const tempId = 'tmp-' + Date.now();
   msgs.innerHTML += `
-    <div style="display:flex;justify-content:flex-end">
+    <div id="${tempId}" style="display:flex;justify-content:flex-end">
       <div style="max-width:70%;padding:8px 12px;border-radius:12px 12px 2px 12px;background:#dcf8c6;box-shadow:0 1px 2px rgba(0,0,0,.1);font-size:13px;line-height:1.5">
         ${text}
-        <div style="font-size:10px;color:#6b9e6b;text-align:right;margin-top:3px">${time} <i class="ti ti-checks" style="font-size:11px"></i></div>
+        <div style="font-size:10px;color:#6b9e6b;text-align:right;margin-top:3px">${time} <i class="ti ti-clock" style="font-size:11px"></i></div>
       </div>
     </div>`;
   msgs.scrollTop = msgs.scrollHeight;
+
+  try {
+    await api('/api/campaigns/send', 'POST', { phone: activePhone, message: text });
+    // Actualizar icono a enviado
+    const tmp = document.getElementById(tempId);
+    if (tmp) tmp.querySelector('.ti-clock').className = 'ti ti-checks';
+  } catch(e) {
+    const tmp = document.getElementById(tempId);
+    if (tmp) tmp.querySelector('div[style*="background:#dcf8c6"]').style.background = '#ffe5e5';
+    showToast('❌ Error al enviar mensaje');
+  }
+  inp.disabled = false;
+  inp.focus();
 }
 
 async function sendAI(){
