@@ -1005,6 +1005,7 @@ async function removeBlocked(id) {
 }
 
 
+async function loadTokenUsage() {
   const data = await api('/api/ai/usage');
   if (!data) return;
   document.getElementById('tokens-used').textContent = (data.tokens_used||0).toLocaleString();
