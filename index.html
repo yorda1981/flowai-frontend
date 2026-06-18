@@ -864,7 +864,37 @@ function renderContacts(list){
   const chColors={whatsapp:'green',telegram:'blue',webchat:'amber'};
   document.getElementById('contacts-body').innerHTML=list.length===0
     ?'<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">No hay contactos. Añade el primero.</td></tr>'
-    :list.map(c=>`<tr><td><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:11px">${(c.name||'?').substring(0,2).toUpperCase()}</div>${c.name||'Sin nombre'}</div></td><td style="color:var(--text2)">${c.phone||'—'}</td><td><span class="badge ${chColors[c.channel]||'gray'}">${c.channel||'—'}</span></td><td><div class="tags">${(c.tags||[]).map(t=>`<span class="badge gray">${t}</span>`).join('')}</div></td><td><span class="badge ${c.status==='active'?'green':'gray'}">${c.status==='active'?'Activo':'Inactivo'}</span></td><td><button class="btn" style="padding:3px 8px;font-size:12px" onclick="deleteContact('${c.id}')"><i class="ti ti-trash"></i></button></td></tr>`).join('');
+    :list.map(c=>`<tr>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:11px">${(c.name||'?').substring(0,2).toUpperCase()}</div>${c.name||'Sin nombre'}</div></td>
+      <td style="color:var(--text2)">${c.phone||'—'}</td>
+      <td><span class="badge ${chColors[c.channel]||'gray'}">${c.channel||'—'}</span></td>
+      <td>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+          ${(c.tags||[]).map(t=>`<span class="badge gray" style="cursor:pointer" onclick="removeTag('${c.id}','${t}','${(c.tags||[]).join(',')}')">${t} ×</span>`).join('')}
+          <span class="badge blue" style="cursor:pointer;font-size:11px" onclick="addTag('${c.id}','${(c.tags||[]).join(',')}')"><i class="ti ti-plus" style="font-size:10px"></i> etiqueta</span>
+        </div>
+      </td>
+      <td><span class="badge ${c.status==='active'?'green':'gray'}">${c.status==='active'?'Activo':'Inactivo'}</span></td>
+      <td><button class="btn" style="padding:3px 8px;font-size:12px" onclick="deleteContact('${c.id}')"><i class="ti ti-trash"></i></button></td>
+    </tr>`).join('');
+}
+
+async function addTag(contactId, currentTagsStr) {
+  const currentTags = currentTagsStr ? currentTagsStr.split(',').filter(Boolean) : [];
+  const tag = prompt('Nueva etiqueta (ej: Cliente permanente, VIP, Prospecto):');
+  if (!tag || !tag.trim()) return;
+  const newTags = [...new Set([...currentTags, tag.trim()])];
+  await api(`/api/contacts/${contactId}`, 'PATCH', { tags: newTags });
+  showToast('Etiqueta agregada ✓');
+  loadContacts();
+}
+
+async function removeTag(contactId, tag, currentTagsStr) {
+  const currentTags = currentTagsStr ? currentTagsStr.split(',').filter(Boolean) : [];
+  const newTags = currentTags.filter(t => t !== tag);
+  await api(`/api/contacts/${contactId}`, 'PATCH', { tags: newTags });
+  showToast('Etiqueta eliminada');
+  loadContacts();
 }
 function searchContacts(q){const f=q.toLowerCase();renderContacts(allContacts.filter(c=>(c.name||'').toLowerCase().includes(f)||(c.phone||'').includes(f)));}
 async function showAddContact(){
