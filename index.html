@@ -489,6 +489,8 @@ tr:hover td{background:#f9fafb}
             </div>
           </div>
           <div style="margin:12px 0;font-size:13px;color:var(--text2)" id="camp-count">0 contactos seleccionados</div>
+          <!-- Filtro por etiqueta -->
+          <div id="camp-label-filters" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
           <div class="search-box" style="margin-bottom:12px">
             <i class="ti ti-search" style="color:var(--text3)"></i>
             <input type="text" placeholder="Buscar contacto..." oninput="campSearch(this.value)">
@@ -1230,11 +1232,35 @@ async function removeBlocked(id) {
 // ── CAMPAÑAS ──
 let campContacts = [];
 let campSelected = new Set();
+let campAllLabels = [];
+let campActiveLabel = 'all';
 
 async function loadCampaigns() {
-  // preload contacts for campaigns
   const data = await api('/api/contacts') || [];
-  campContacts = data;
+  // Filtrar grupos y números inválidos
+  campContacts = data.filter(c => c.phone && !c.phone.includes('@g.us') && !c.phone.includes('@lid') && !c.phone.includes('-'));
+  // Extraer etiquetas únicas
+  campAllLabels = [...new Set(campContacts.flatMap(c => c.tags || []))].filter(Boolean);
+  renderLabelFilters();
+}
+
+function renderLabelFilters() {
+  const wrap = document.getElementById('camp-label-filters');
+  if (!wrap) return;
+  const labels = ['all', ...campAllLabels];
+  wrap.innerHTML = labels.map(l => `
+    <span onclick="campFilterLabel('${l}')" id="camp-lbl-${l}"
+      class="badge ${campActiveLabel===l?'blue':''}"
+      style="cursor:pointer;padding:4px 12px;font-size:12px">
+      ${l==='all'?'Todos los contactos':l}
+    </span>`).join('');
+}
+
+function campFilterLabel(label) {
+  campActiveLabel = label;
+  renderLabelFilters();
+  const filtered = label === 'all' ? campContacts : campContacts.filter(c => (c.tags||[]).includes(label));
+  renderCampContacts(filtered);
 }
 
 function campStep2() {
@@ -1244,11 +1270,15 @@ function campStep2() {
   if (!msg) { showToast('Escribe el mensaje'); return; }
   document.getElementById('camp-step-1').style.display = 'none';
   document.getElementById('camp-step-2').style.display = 'block';
+  campActiveLabel = 'all';
+  renderLabelFilters();
   renderCampContacts(campContacts);
 }
 
 function renderCampContacts(list) {
-  document.getElementById('camp-contacts-list').innerHTML = list.map(c => `
+  document.getElementById('camp-contacts-list').innerHTML = list.length === 0
+    ? '<div style="padding:20px;text-align:center;color:var(--text2);font-size:13px">No hay contactos disponibles</div>'
+    : list.map(c => `
     <div onclick="campToggle('${c.id}')" id="camp-c-${c.id}"
       style="padding:10px;border:2px solid ${campSelected.has(c.id)?'var(--blue)':'var(--border)'};border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;gap:8px;background:${campSelected.has(c.id)?'var(--blue-light)':''}">
       <div class="avatar" style="width:28px;height:28px;font-size:11px;flex-shrink:0">${(c.name||'?').substring(0,2).toUpperCase()}</div>
