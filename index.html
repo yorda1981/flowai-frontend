@@ -396,6 +396,7 @@ tr:hover td{background:#f9fafb}
             <div class="node-tpl" draggable="true" data-type="api"><i class="ti ti-api" style="color:var(--purple)"></i>API externa</div>
             <h3>IA</h3>
             <div class="node-tpl" draggable="true" data-type="ai"><i class="ti ti-sparkles" style="color:var(--purple)"></i>Acción IA</div>
+            <div class="node-tpl" draggable="true" data-type="capture"><i class="ti ti-forms" style="color:var(--teal)"></i>Capturar dato</div>
             <h3>Final</h3>
             <div class="node-tpl" draggable="true" data-type="end"><i class="ti ti-player-stop" style="color:var(--text2)"></i>Finalizar</div>
           </div>
@@ -1031,8 +1032,8 @@ function filterFlows(type,el){
 }
 
 const nodeColors={start:'#E1F5EE',message:'#E6F1FB',button:'#FAEEDA',ai:'#EEEDFE',condition:'#FCEBEB',end:'#f3f4f6',wait:'#f3f4f6',api:'#EEEDFE'};
-const nodeTypeLabel={start:'Inicio',message:'Mensaje',button:'Botones',ai:'Acción IA',condition:'Condición',end:'Final',wait:'Espera',api:'API ext.'};
-const nodeTypeColor={start:'#0F6E56',message:'#185FA5',button:'#854F0B',ai:'#534AB7',condition:'#A32D2D',end:'#6b7280',wait:'#6b7280',api:'#534AB7'};
+const nodeTypeLabel={start:'Inicio',message:'Mensaje',button:'Botones',ai:'Acción IA',condition:'Condición',end:'Final',wait:'Espera',api:'API ext.',capture:'Capturar dato'};
+const nodeTypeColor={start:'#0F6E56',message:'#185FA5',button:'#854F0B',ai:'#534AB7',condition:'#A32D2D',end:'#6b7280',wait:'#6b7280',api:'#534AB7',capture:'#0F6E56'};
 let flowNodes=[],flowEdges=[],selectedNodeId=null,currentFlowId=null;
 const defaultFlow=[{id:0,type:'start',x:30,y:110,label:'Inicio',sub:'Mensaje entrante'},{id:1,type:'message',x:220,y:50,label:'Bienvenida',sub:'Hola, ¿en qué te ayudo?'},{id:2,type:'ai',x:420,y:50,label:'Respuesta IA',sub:'Eres un asistente amable. Responde brevemente.'},{id:3,type:'end',x:610,y:50,label:'Fin',sub:'Conversación cerrada'}];
 const defaultEdges=[[0,1],[1,2],[2,3]];
@@ -1097,7 +1098,33 @@ function renderEdgesSVG(){
 }
 function selectNode(id){
   selectedNodeId=id;const n=flowNodes.find(x=>x.id===id);renderCanvas();
-  document.getElementById('flow-props').innerHTML=`<div style="font-weight:600;font-size:13px;margin-bottom:14px;color:${nodeTypeColor[n.type]}">${nodeTypeLabel[n.type]}</div><div class="prop-label">Nombre</div><input class="prop-input" value="${n.label}" oninput="flowNodes.find(x=>x.id===${id}).label=this.value;renderCanvas()"><div class="prop-label">${n.type==='ai'?'Prompt de IA':'Contenido'}</div><textarea class="prop-textarea" oninput="flowNodes.find(x=>x.id===${id}).sub=this.value;renderCanvas()">${n.sub}</textarea><div style="margin-top:16px"><button class="btn" style="width:100%;justify-content:center;color:var(--red)" onclick="flowNodes=flowNodes.filter(x=>x.id!==${id});renderCanvas();document.getElementById('flow-props').innerHTML='<div class=empty-state>Nodo eliminado</div>'"><i class="ti ti-trash"></i>Eliminar</button></div>`;
+  let extraFields = '';
+  if (n.type === 'capture') {
+    extraFields = `
+      <div class="prop-label">Pregunta al cliente</div>
+      <textarea class="prop-textarea" oninput="flowNodes.find(x=>x.id===${id}).sub=this.value;renderCanvas()">${n.sub||''}</textarea>
+      <div class="prop-label">Guardar respuesta en</div>
+      <select class="prop-select" onchange="flowNodes.find(x=>x.id===${id}).field=this.value">
+        <option value="name" ${n.field==='name'?'selected':''}>Nombre del contacto</option>
+        <option value="email" ${n.field==='email'?'selected':''}>Email del contacto</option>
+        <option value="interest" ${n.field==='interest'?'selected':''}>Interés</option>
+        <option value="company" ${n.field==='company'?'selected':''}>Empresa</option>
+        <option value="city" ${n.field==='city'?'selected':''}>Ciudad</option>
+        <option value="custom" ${(!n.field||n.field==='custom')?'selected':''}>Dato personalizado</option>
+      </select>`;
+  } else {
+    extraFields = `
+      <div class="prop-label">${n.type==='ai'?'Prompt de IA':'Contenido'}</div>
+      <textarea class="prop-textarea" oninput="flowNodes.find(x=>x.id===${id}).sub=this.value;renderCanvas()">${n.sub||''}</textarea>`;
+  }
+  document.getElementById('flow-props').innerHTML=`
+    <div style="font-weight:600;font-size:13px;margin-bottom:14px;color:${nodeTypeColor[n.type]}">${nodeTypeLabel[n.type]}</div>
+    <div class="prop-label">Nombre</div>
+    <input class="prop-input" value="${n.label||''}" oninput="flowNodes.find(x=>x.id===${id}).label=this.value;renderCanvas()">
+    ${extraFields}
+    <div style="margin-top:16px">
+      <button class="btn" style="width:100%;justify-content:center;color:var(--red)" onclick="flowNodes=flowNodes.filter(x=>x.id!==${id});renderCanvas();document.getElementById('flow-props').innerHTML='<div class=empty-state>Nodo eliminado</div>'"><i class="ti ti-trash"></i>Eliminar</button>
+    </div>`;
 }
 document.getElementById('flow-canvas').addEventListener('dragover',e=>e.preventDefault());
 document.getElementById('flow-canvas').addEventListener('drop',e=>{
