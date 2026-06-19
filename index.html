@@ -202,7 +202,12 @@ tr:hover td{background:#f9fafb}
 .agent-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;display:flex;flex-direction:column;gap:12px}
 .agent-add{border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;cursor:pointer;color:var(--text2);gap:8px}
 .agent-add:hover{background:#f9fafb}
-.loading{display:flex;align-items:center;justify-content:center;height:80px;color:var(--text3);gap:8px;font-size:13px}
+.kanban-col{background:var(--bg);border-radius:var(--radius-lg);padding:10px}
+.kanban-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;cursor:pointer;transition:box-shadow .15s}
+.kanban-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.kanban-card .kc-name{font-size:13px;font-weight:500;margin-bottom:4px}
+.kanban-card .kc-phone{font-size:11px;color:var(--text2)}
+.kanban-card .kc-stage{display:flex;gap:4px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -410,15 +415,43 @@ tr:hover td{background:#f9fafb}
 
     <!-- CONTACTS -->
     <div class="page" id="page-contacts">
-      <div style="display:flex;gap:10px;margin-bottom:16px">
+      <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
         <div class="search-box"><i class="ti ti-search" style="color:var(--text3)"></i><input type="text" placeholder="Buscar contacto..." oninput="searchContacts(this.value)"></div>
+        <div style="display:flex;gap:4px;border:1px solid var(--border2);border-radius:var(--radius);padding:3px">
+          <button class="btn" id="view-list-btn" onclick="setContactView('list')" style="padding:4px 10px;font-size:12px;background:var(--blue);color:#fff;border:none"><i class="ti ti-list"></i> Lista</button>
+          <button class="btn" id="view-kanban-btn" onclick="setContactView('kanban')" style="padding:4px 10px;font-size:12px;border:none"><i class="ti ti-layout-kanban"></i> Pipeline</button>
+        </div>
         <button class="btn primary" onclick="showAddContact()"><i class="ti ti-user-plus"></i>Nuevo contacto</button>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Nombre</th><th>Número</th><th>Canal</th><th>Etiquetas</th><th>Estado</th><th></th></tr></thead>
-          <tbody id="contacts-body"><tr><td colspan="6"><div class="loading"><i class="ti ti-loader-2"></i>Cargando...</div></td></tr></tbody>
-        </table>
+      <!-- Vista Lista -->
+      <div id="contacts-list-view">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nombre</th><th>Número</th><th>Canal</th><th>Etiquetas</th><th>Pipeline</th><th></th></tr></thead>
+            <tbody id="contacts-body"><tr><td colspan="6"><div class="loading"><i class="ti ti-loader-2"></i>Cargando...</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Vista Kanban/Pipeline -->
+      <div id="contacts-kanban-view" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:start">
+          <div class="kanban-col" data-stage="lead">
+            <div style="font-weight:600;font-size:12px;color:var(--text2);margin-bottom:10px;padding:6px 10px;background:#f3f4f6;border-radius:var(--radius);display:flex;align-items:center;gap:6px"><i class="ti ti-user" style="color:var(--blue)"></i>Lead <span id="count-lead" style="margin-left:auto;background:var(--blue-light);color:var(--blue);padding:1px 7px;border-radius:10px;font-size:11px">0</span></div>
+            <div id="kanban-lead" style="display:flex;flex-direction:column;gap:8px;min-height:100px"></div>
+          </div>
+          <div class="kanban-col" data-stage="interesado">
+            <div style="font-weight:600;font-size:12px;color:var(--text2);margin-bottom:10px;padding:6px 10px;background:#f3f4f6;border-radius:var(--radius);display:flex;align-items:center;gap:6px"><i class="ti ti-star" style="color:var(--amber)"></i>Interesado <span id="count-interesado" style="margin-left:auto;background:var(--amber-light);color:var(--amber);padding:1px 7px;border-radius:10px;font-size:11px">0</span></div>
+            <div id="kanban-interesado" style="display:flex;flex-direction:column;gap:8px;min-height:100px"></div>
+          </div>
+          <div class="kanban-col" data-stage="negociacion">
+            <div style="font-weight:600;font-size:12px;color:var(--text2);margin-bottom:10px;padding:6px 10px;background:#f3f4f6;border-radius:var(--radius);display:flex;align-items:center;gap:6px"><i class="ti ti-handshake" style="color:var(--purple)"></i>Negociación <span id="count-negociacion" style="margin-left:auto;background:var(--purple-light);color:var(--purple);padding:1px 7px;border-radius:10px;font-size:11px">0</span></div>
+            <div id="kanban-negociacion" style="display:flex;flex-direction:column;gap:8px;min-height:100px"></div>
+          </div>
+          <div class="kanban-col" data-stage="cliente">
+            <div style="font-weight:600;font-size:12px;color:var(--text2);margin-bottom:10px;padding:6px 10px;background:#f3f4f6;border-radius:var(--radius);display:flex;align-items:center;gap:6px"><i class="ti ti-trophy" style="color:var(--green)"></i>Cliente <span id="count-cliente" style="margin-left:auto;background:var(--green-light);color:var(--green);padding:1px 7px;border-radius:10px;font-size:11px">0</span></div>
+            <div id="kanban-cliente" style="display:flex;flex-direction:column;gap:8px;min-height:100px"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -919,9 +952,65 @@ function renderContacts(list){
           <span class="badge blue" style="cursor:pointer;font-size:11px" onclick="addTag('${c.id}','${(c.tags||[]).join(',')}')"><i class="ti ti-plus" style="font-size:10px"></i> etiqueta</span>
         </div>
       </td>
-      <td><span class="badge ${c.status==='active'?'green':'gray'}">${c.status==='active'?'Activo':'Inactivo'}</span></td>
+      <td>
+        <select style="font-size:12px;padding:3px 6px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--surface);color:var(--text);outline:none;cursor:pointer" onchange="updateStage('${c.id}',this.value)">
+          <option value="" ${!c.pipeline_stage?'selected':''}>— Sin etapa —</option>
+          <option value="lead" ${c.pipeline_stage==='lead'?'selected':''}>🎯 Lead</option>
+          <option value="interesado" ${c.pipeline_stage==='interesado'?'selected':''}>⭐ Interesado</option>
+          <option value="negociacion" ${c.pipeline_stage==='negociacion'?'selected':''}>🤝 Negociación</option>
+          <option value="cliente" ${c.pipeline_stage==='cliente'?'selected':''}>🏆 Cliente</option>
+        </select>
+      </td>
       <td><button class="btn" style="padding:3px 8px;font-size:12px" onclick="deleteContact('${c.id}')"><i class="ti ti-trash"></i></button></td>
     </tr>`).join('');
+}
+
+let contactView = 'list';
+function setContactView(view) {
+  contactView = view;
+  document.getElementById('contacts-list-view').style.display = view === 'list' ? '' : 'none';
+  document.getElementById('contacts-kanban-view').style.display = view === 'kanban' ? '' : 'none';
+  document.getElementById('view-list-btn').style.background = view === 'list' ? 'var(--blue)' : '';
+  document.getElementById('view-list-btn').style.color = view === 'list' ? '#fff' : '';
+  document.getElementById('view-kanban-btn').style.background = view === 'kanban' ? 'var(--blue)' : '';
+  document.getElementById('view-kanban-btn').style.color = view === 'kanban' ? '#fff' : '';
+  if (view === 'kanban') renderKanban(allContacts);
+}
+
+function renderKanban(list) {
+  const stages = ['lead','interesado','negociacion','cliente'];
+  const stageColors = {lead:'var(--blue)',interesado:'var(--amber)',negociacion:'var(--purple)',cliente:'var(--green)'};
+  stages.forEach(stage => {
+    const contacts = list.filter(c => c.pipeline_stage === stage);
+    document.getElementById('count-' + stage).textContent = contacts.length;
+    document.getElementById('kanban-' + stage).innerHTML = contacts.length === 0
+      ? `<div style="text-align:center;color:var(--text3);font-size:12px;padding:20px 0">Sin contactos</div>`
+      : contacts.map(c => `
+        <div class="kanban-card" onclick="openKanbanContact('${c.id}','${(c.name||'').replace(/'/g,"\\'")}','${c.pipeline_stage||''}')">
+          <div class="kc-name">${c.name||'Sin nombre'}</div>
+          <div class="kc-phone">${c.phone||'—'}</div>
+          ${(c.tags||[]).length > 0 ? `<div class="kc-stage">${(c.tags||[]).slice(0,2).map(t=>`<span class="badge gray" style="font-size:10px">${t}</span>`).join('')}</div>` : ''}
+          <div style="display:flex;gap:4px;margin-top:6px">
+            ${stages.filter(s=>s!==stage).map(s=>`<button class="btn" style="padding:2px 6px;font-size:10px" onclick="event.stopPropagation();moveStage('${c.id}','${s}')" title="Mover a ${s}">→${s.substring(0,3)}</button>`).join('')}
+          </div>
+        </div>`).join('');
+  });
+}
+
+async function updateStage(contactId, stage) {
+  await api(`/api/contacts/${contactId}`, 'PATCH', { pipeline_stage: stage });
+  const c = allContacts.find(x => x.id === contactId);
+  if (c) c.pipeline_stage = stage;
+  if (contactView === 'kanban') renderKanban(allContacts);
+  showToast('Etapa actualizada ✓');
+}
+
+async function moveStage(contactId, stage) {
+  await updateStage(contactId, stage);
+}
+
+function openKanbanContact(id, name, stage) {
+  showToast(`${name} — ${stage}`);
 }
 
 async function addTag(contactId, currentTagsStr) {
