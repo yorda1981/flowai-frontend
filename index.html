@@ -203,6 +203,13 @@ tr:hover td{background:#f9fafb}
 .agent-add{border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;cursor:pointer;color:var(--text2);gap:8px}
 .agent-add:hover{background:#f9fafb}
 .kanban-col{background:var(--bg);border-radius:var(--radius-lg);padding:10px}
+.apt-chip{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:500;cursor:pointer;border-left:3px solid var(--blue);background:var(--blue-light);color:var(--blue);margin-bottom:3px}
+.apt-chip.green{border-color:var(--green);background:var(--green-light);color:var(--green)}
+.apt-chip.red{border-color:var(--red);background:var(--red-light);color:var(--red)}
+.apt-chip.gray{border-color:var(--text3);background:var(--bg);color:var(--text2)}
+.agenda-hour{display:flex;border-bottom:1px solid var(--border);min-height:56px}
+.agenda-hour-label{width:56px;font-size:11px;color:var(--text3);padding:4px 8px;flex-shrink:0;border-right:1px solid var(--border)}
+.agenda-hour-slot{flex:1;padding:2px 4px;position:relative}
 .kanban-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;cursor:pointer;transition:box-shadow .15s}
 .kanban-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1)}
 .kanban-card .kc-name{font-size:13px;font-weight:500;margin-bottom:4px}
@@ -293,6 +300,7 @@ tr:hover td{background:#f9fafb}
     <div class="nav-section">CRM</div>
     <div class="nav-item" onclick="nav('contacts',this)"><i class="ti ti-users"></i>Contactos</div>
     <div class="nav-item" onclick="nav('messages',this)"><i class="ti ti-message-circle"></i>Mensajes</div>
+    <div class="nav-item" onclick="nav('agenda',this)"><i class="ti ti-calendar"></i>Agenda</div>
     <div class="nav-item" onclick="nav('blocked',this)"><i class="ti ti-ban"></i>Bloqueados</div>
     <div class="nav-item" onclick="nav('campaigns',this)"><i class="ti ti-speakerphone"></i>Campañas</div>
     <div class="nav-section">Plataforma</div>
@@ -499,6 +507,72 @@ tr:hover td{background:#f9fafb}
     </div>
 
     <!-- BLOQUEADOS -->
+    <!-- AGENDA -->
+    <div class="page" id="page-agenda">
+      <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn" onclick="changeAgendaView('day')" id="view-day-btn" style="font-size:12px;padding:5px 10px"><i class="ti ti-calendar-day"></i> Día</button>
+          <button class="btn" onclick="changeAgendaView('week')" id="view-week-btn" style="font-size:12px;padding:5px 10px;background:var(--blue);color:#fff;border-color:var(--blue)"><i class="ti ti-calendar-week"></i> Semana</button>
+          <button class="btn" onclick="changeAgendaView('month')" id="view-month-btn" style="font-size:12px;padding:5px 10px"><i class="ti ti-calendar-month"></i> Mes</button>
+        </div>
+        <button class="btn" onclick="agendaNavDate(-1)" style="padding:5px 8px"><i class="ti ti-chevron-left"></i></button>
+        <span id="agenda-date-label" style="font-size:14px;font-weight:600;min-width:160px;text-align:center"></span>
+        <button class="btn" onclick="agendaNavDate(1)" style="padding:5px 8px"><i class="ti ti-chevron-right"></i></button>
+        <button class="btn" onclick="agendaGoToday()" style="font-size:12px;padding:5px 10px">Hoy</button>
+        <button class="btn primary" onclick="openNewAppointment()" style="margin-left:auto"><i class="ti ti-plus"></i>Nueva cita</button>
+      </div>
+      <div id="agenda-container" class="card" style="padding:0;overflow:hidden;min-height:500px"></div>
+    </div>
+
+    <!-- MODAL NUEVA CITA -->
+    <div id="modal-appointment" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border-radius:var(--radius-lg);padding:24px;width:440px;max-width:95vw">
+        <div style="font-size:15px;font-weight:600;margin-bottom:16px">Nueva cita</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <div class="prop-label">Contacto</div>
+            <input id="apt-contact" class="prop-input" placeholder="Nombre del cliente" list="contacts-datalist">
+            <datalist id="contacts-datalist"></datalist>
+          </div>
+          <div>
+            <div class="prop-label">Teléfono</div>
+            <input id="apt-phone" class="prop-input" placeholder="+55 11 99999-0000">
+          </div>
+          <div>
+            <div class="prop-label">Servicio</div>
+            <input id="apt-service" class="prop-input" placeholder="Ej: Consulta, Limpieza, Mentoría...">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <div class="prop-label">Fecha</div>
+              <input id="apt-date" type="date" class="prop-input">
+            </div>
+            <div>
+              <div class="prop-label">Hora</div>
+              <input id="apt-time" type="time" class="prop-input">
+            </div>
+          </div>
+          <div>
+            <div class="prop-label">Duración</div>
+            <select id="apt-duration" class="prop-input">
+              <option value="30">30 minutos</option>
+              <option value="60" selected>1 hora</option>
+              <option value="90">1h 30min</option>
+              <option value="120">2 horas</option>
+            </select>
+          </div>
+          <div>
+            <div class="prop-label">Notas</div>
+            <textarea id="apt-notes" class="prop-input" style="resize:vertical;min-height:60px" placeholder="Observaciones..."></textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+          <button class="btn" onclick="closeAppointmentModal()">Cancelar</button>
+          <button class="btn primary" onclick="saveAppointment()"><i class="ti ti-device-floppy"></i>Guardar cita</button>
+        </div>
+      </div>
+    </div>
+
     <div class="page" id="page-blocked">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
         <div class="search-box" style="max-width:320px">
@@ -902,9 +976,10 @@ function nav(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+id)?.classList.add('active');
   if (el) el.classList.add('active');
-  const titles={dashboard:'Dashboard',agents:'Agentes',flows:'Flujos',contacts:'Contactos CRM',messages:'Mensajes',blocked:'Números Bloqueados',campaigns:'Campañas',stats:'Estadísticas',plans:'Planes',ai:'Asistente IA',config:'Configuración'};
+  const titles={dashboard:'Dashboard',agents:'Agentes',flows:'Flujos',contacts:'Contactos CRM',messages:'Mensajes',agenda:'Agenda',blocked:'Números Bloqueados',campaigns:'Campañas',stats:'Estadísticas',plans:'Planes',ai:'Asistente IA',config:'Configuración'};
   document.getElementById('page-title').textContent = titles[id]||id;
   if (id==='contacts') loadContacts();
+  if (id==='agenda') loadAgenda();
   if (id==='flows') loadFlows();
   if (id==='stats') loadStats();
   if (id==='agents') loadAgents();
@@ -1786,7 +1861,213 @@ function toggleKeyVisibility() {
     icon.className = 'ti ti-eye';
   }
 }
-function toggleDark(){
+// ─── AGENDA ───────────────────────────────────────
+let agendaView = 'week';
+let agendaDate = new Date();
+let allAppointments = [];
+let editingAppointmentId = null;
+
+async function loadAgenda() {
+  const data = await api('/api/appointments') || [];
+  allAppointments = data;
+  renderAgenda();
+  const dl = document.getElementById('contacts-datalist');
+  if (dl && allContacts.length === 0) await loadContacts();
+  if (dl) dl.innerHTML = allContacts.map(c => `<option value="${c.name||''}">${c.name} — ${c.phone}</option>`).join('');
+}
+
+function changeAgendaView(view) {
+  agendaView = view;
+  ['day','week','month'].forEach(v => {
+    const btn = document.getElementById('view-' + v + '-btn');
+    if (btn) { btn.style.background = v===view?'var(--blue)':''; btn.style.color = v===view?'#fff':''; btn.style.borderColor = v===view?'var(--blue)':'var(--border2)'; }
+  });
+  renderAgenda();
+}
+
+function agendaNavDate(dir) {
+  if (agendaView==='day') agendaDate.setDate(agendaDate.getDate() + dir);
+  else if (agendaView==='week') agendaDate.setDate(agendaDate.getDate() + dir*7);
+  else agendaDate.setMonth(agendaDate.getMonth() + dir);
+  agendaDate = new Date(agendaDate);
+  renderAgenda();
+}
+
+function agendaGoToday() { agendaDate = new Date(); renderAgenda(); }
+
+function renderAgenda() {
+  const container = document.getElementById('agenda-container');
+  const label = document.getElementById('agenda-date-label');
+  if (!container) return;
+  if (agendaView === 'week') renderWeekView(container, label);
+  else if (agendaView === 'day') renderDayView(container, label);
+  else renderMonthView(container, label);
+}
+
+function getWeekDays(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day===0?-6:1);
+  d.setDate(diff);
+  return Array.from({length:7}, (_, i) => { const x = new Date(d); x.setDate(d.getDate()+i); return x; });
+}
+
+function aptsForDate(date) {
+  const ds = date.toISOString().split('T')[0];
+  return allAppointments.filter(a => a.date === ds);
+}
+
+function aptColor(status) {
+  if (status==='confirmada') return 'green';
+  if (status==='cancelada') return 'red';
+  return '';
+}
+
+function renderWeekView(container, label) {
+  const days = getWeekDays(agendaDate);
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  label.textContent = `${days[0].getDate()} ${months[days[0].getMonth()]} — ${days[6].getDate()} ${months[days[6].getMonth()]} ${days[6].getFullYear()}`;
+  const today = new Date().toISOString().split('T')[0];
+  const hours = Array.from({length:14}, (_,i)=>i+7);
+  container.innerHTML = `
+    <div style="display:grid;grid-template-columns:56px repeat(7,1fr);border-bottom:1px solid var(--border)">
+      <div style="padding:8px;border-right:1px solid var(--border)"></div>
+      ${days.map(d=>{
+        const ds=d.toISOString().split('T')[0];
+        const isToday=ds===today;
+        return `<div style="padding:8px;text-align:center;border-right:1px solid var(--border);font-size:12px;${isToday?'background:var(--blue-light);color:var(--blue);font-weight:600':''}">
+          <div>${['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()]}</div>
+          <div style="font-size:18px;font-weight:700">${d.getDate()}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="overflow-y:auto;max-height:520px">
+      ${hours.map(h=>`
+        <div style="display:grid;grid-template-columns:56px repeat(7,1fr);border-bottom:1px solid var(--border);min-height:56px">
+          <div class="agenda-hour-label">${h}:00</div>
+          ${days.map(d=>{
+            const apts = aptsForDate(d).filter(a=>a.time && parseInt(a.time.split(':')[0])===h);
+            return `<div class="agenda-hour-slot" style="border-right:1px solid var(--border)">
+              ${apts.map(a=>`<div class="apt-chip ${aptColor(a.status)}" onclick="openEditAppointment('${a.id}')" title="${a.service||''}">
+                <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.time} ${a.contact_name||''}</div>
+                <div style="font-size:10px;opacity:.8">${a.service||''}</div>
+              </div>`).join('')}
+            </div>`;
+          }).join('')}
+        </div>`).join('')}
+    </div>`;
+}
+
+function renderDayView(container, label) {
+  const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  label.textContent = `${agendaDate.getDate()} de ${months[agendaDate.getMonth()]} ${agendaDate.getFullYear()}`;
+  const hours = Array.from({length:14}, (_,i)=>i+7);
+  const apts = aptsForDate(agendaDate);
+  container.innerHTML = `<div style="overflow-y:auto;max-height:580px">
+    ${hours.map(h=>{
+      const hapts = apts.filter(a=>a.time && parseInt(a.time.split(':')[0])===h);
+      return `<div class="agenda-hour">
+        <div class="agenda-hour-label">${h}:00</div>
+        <div class="agenda-hour-slot">
+          ${hapts.map(a=>`<div class="apt-chip ${aptColor(a.status)}" onclick="openEditAppointment('${a.id}')" style="padding:6px 10px">
+            <div style="font-weight:600">${a.time} — ${a.contact_name||'Sin nombre'}</div>
+            <div style="font-size:11px">${a.service||''} ${a.duration?'('+a.duration+'min)':''}</div>
+            ${a.notes?`<div style="font-size:11px;opacity:.7">${a.notes}</div>`:''}
+          </div>`).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderMonthView(container, label) {
+  const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const year = agendaDate.getFullYear();
+  const month = agendaDate.getMonth();
+  label.textContent = `${months[month]} ${year}`;
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month+1, 0);
+  const startDay = firstDay.getDay()===0?6:firstDay.getDay()-1;
+  const today = new Date().toISOString().split('T')[0];
+  let cells = [];
+  for(let i=0;i<startDay;i++) cells.push(null);
+  for(let i=1;i<=lastDay.getDate();i++) cells.push(new Date(year,month,i));
+  while(cells.length%7!==0) cells.push(null);
+  container.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border)">
+      ${['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(d=>`<div style="padding:8px;text-align:center;font-size:12px;font-weight:600;color:var(--text2);border-right:1px solid var(--border)">${d}</div>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr)">
+      ${cells.map(d=>{
+        if(!d) return `<div style="border-right:1px solid var(--border);border-bottom:1px solid var(--border);min-height:90px;background:var(--bg)"></div>`;
+        const ds = d.toISOString().split('T')[0];
+        const isToday = ds===today;
+        const apts = aptsForDate(d);
+        return `<div style="border-right:1px solid var(--border);border-bottom:1px solid var(--border);min-height:90px;padding:4px;${isToday?'background:var(--blue-light)':''}">
+          <div style="font-size:12px;font-weight:${isToday?'700':'400'};color:${isToday?'var(--blue)':'var(--text)'};margin-bottom:4px">${d.getDate()}</div>
+          ${apts.slice(0,3).map(a=>`<div class="apt-chip ${aptColor(a.status)}" onclick="openEditAppointment('${a.id}')" style="font-size:10px;padding:2px 5px">${a.time||''} ${a.contact_name||''}</div>`).join('')}
+          ${apts.length>3?`<div style="font-size:10px;color:var(--text3)">+${apts.length-3} más</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function openNewAppointment() {
+  editingAppointmentId = null;
+  document.getElementById('apt-contact').value = '';
+  document.getElementById('apt-phone').value = '';
+  document.getElementById('apt-service').value = '';
+  document.getElementById('apt-date').value = agendaDate.toISOString().split('T')[0];
+  document.getElementById('apt-time').value = '09:00';
+  document.getElementById('apt-duration').value = '60';
+  document.getElementById('apt-notes').value = '';
+  document.getElementById('modal-appointment').style.display = 'flex';
+}
+
+function openEditAppointment(id) {
+  const a = allAppointments.find(x=>x.id===id);
+  if (!a) return;
+  editingAppointmentId = id;
+  document.getElementById('apt-contact').value = a.contact_name||'';
+  document.getElementById('apt-phone').value = a.phone||'';
+  document.getElementById('apt-service').value = a.service||'';
+  document.getElementById('apt-date').value = a.date||'';
+  document.getElementById('apt-time').value = a.time||'';
+  document.getElementById('apt-duration').value = a.duration||60;
+  document.getElementById('apt-notes').value = a.notes||'';
+  document.getElementById('modal-appointment').style.display = 'flex';
+}
+
+function closeAppointmentModal() {
+  document.getElementById('modal-appointment').style.display = 'none';
+}
+
+async function saveAppointment() {
+  const payload = {
+    contact_name: document.getElementById('apt-contact').value.trim(),
+    phone: document.getElementById('apt-phone').value.trim(),
+    service: document.getElementById('apt-service').value.trim(),
+    date: document.getElementById('apt-date').value,
+    time: document.getElementById('apt-time').value,
+    duration: parseInt(document.getElementById('apt-duration').value),
+    notes: document.getElementById('apt-notes').value.trim(),
+    status: 'pendiente'
+  };
+  if (!payload.contact_name || !payload.date || !payload.time) {
+    showToast('❌ Nombre, fecha y hora son requeridos'); return;
+  }
+  if (editingAppointmentId) {
+    await api(`/api/appointments/${editingAppointmentId}`, 'PATCH', payload);
+    showToast('✅ Cita actualizada');
+  } else {
+    await api('/api/appointments', 'POST', payload);
+    showToast('✅ Cita creada');
+  }
+  closeAppointmentModal();
+  loadAgenda();
+}
+
+
   const dark=document.body.classList.toggle('dark');
   localStorage.setItem('flowai-dark', dark?'1':'0');
   document.getElementById('dark-icon').className=dark?'ti ti-sun':'ti ti-moon';
