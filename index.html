@@ -723,7 +723,11 @@ tr:hover td{background:#f9fafb}
     <div class="page" id="page-plans">
       <div style="margin-bottom:24px;padding:16px;background:var(--blue-light);border-radius:var(--radius-lg);display:flex;align-items:center;gap:12px">
         <i class="ti ti-crown" style="font-size:22px;color:var(--blue)"></i>
-        <div><div style="font-weight:600;color:var(--blue)" id="current-plan-label">Plan activo</div><div style="font-size:13px;color:var(--text2)">Gestiona tu suscripción desde aquí</div></div>
+        <div>
+          <div style="font-weight:600;color:var(--blue)" id="current-plan-label">Plan activo</div>
+          <div style="font-size:13px;color:var(--text2)" id="current-plan-status">Gestiona tu suscripción desde aquí</div>
+        </div>
+        <button class="btn" id="btn-cancel-plan" onclick="cancelSubscription()" style="margin-left:auto;display:none;color:var(--red)"><i class="ti ti-x"></i>Cancelar plan</button>
       </div>
       <div class="plan-grid">
         <div class="plan-card">
@@ -736,7 +740,7 @@ tr:hover td{background:#f9fafb}
             <li><i class="ti ti-x" style="color:var(--red)"></i>IA integrada</li>
             <li><i class="ti ti-x" style="color:var(--red)"></i>Multiatendente</li>
           </ul>
-          <button class="btn" style="width:100%;justify-content:center">Seleccionar</button>
+          <button class="btn" id="btn-plan-starter" style="width:100%;justify-content:center" onclick="subscribePlan('starter')"><i class="ti ti-credit-card"></i>Assinatura R$97/mês</button>
         </div>
         <div class="plan-card featured">
           <div class="plan-popular">Más popular</div>
@@ -749,7 +753,7 @@ tr:hover td{background:#f9fafb}
             <li><i class="ti ti-check" style="color:var(--green)"></i>IA integrada</li>
             <li><i class="ti ti-x" style="color:var(--red)"></i>Multiatendente</li>
           </ul>
-          <button class="btn primary" style="width:100%;justify-content:center">Seleccionar</button>
+          <button class="btn primary" id="btn-plan-pro" style="width:100%;justify-content:center" onclick="subscribePlan('pro')"><i class="ti ti-credit-card"></i>Assinatura R$197/mês</button>
         </div>
         <div class="plan-card">
           <div style="font-size:17px;font-weight:700;margin-bottom:4px">Business</div>
@@ -762,7 +766,7 @@ tr:hover td{background:#f9fafb}
             <li><i class="ti ti-check" style="color:var(--green)"></i>Multiatendente</li>
             <li><i class="ti ti-check" style="color:var(--green)"></i>Soporte prioritario</li>
           </ul>
-          <button class="btn" style="width:100%;justify-content:center">Seleccionar</button>
+          <button class="btn" id="btn-plan-business" style="width:100%;justify-content:center" onclick="subscribePlan('business')"><i class="ti ti-credit-card"></i>Assinatura R$397/mês</button>
         </div>
       </div>
     </div>
@@ -987,6 +991,7 @@ function nav(id, el) {
   if (id==='blocked') loadBlocked();
   if (id==='campaigns') loadCampaigns();
   if (id==='config') { loadTokenUsage(); loadKnowledgeBase(); }
+  if (id==='plans') loadPlanStatus();
 }
 
 function showToast(msg) {
@@ -2065,6 +2070,52 @@ async function saveAppointment() {
   }
   closeAppointmentModal();
   loadAgenda();
+}
+
+// ─── PAGAMENTOS ───────────────────────────────────
+async function loadPlanStatus() {
+  const data = await api('/api/payments/status');
+  if (!data) return;
+  const plan = data.plan || 'free';
+  const status = data.status || 'none';
+  const label = document.getElementById('current-plan-label');
+  const statusEl = document.getElementById('current-plan-status');
+  const cancelBtn = document.getElementById('btn-cancel-plan');
+  if (label) label.textContent = `Plan ${plan.charAt(0).toUpperCase()+plan.slice(1)} ${status==='authorized'?'✅':''}`;
+  if (statusEl) statusEl.textContent = status==='authorized'?'Suscripción activa — Renovación automática mensual': status==='pending'?'Pago pendiente':'Sin suscripción activa';
+  if (cancelBtn) cancelBtn.style.display = status==='authorized'?'':'none';
+  // Marcar plan activo
+  ['starter','pro','business'].forEach(p => {
+    const btn = document.getElementById('btn-plan-'+p);
+    if (btn) {
+      if (p===plan && status==='authorized') {
+        btn.textContent = '✅ Plan activo';
+        btn.disabled = true;
+      }
+    }
+  });
+}
+
+async function subscribePlan(plan) {
+  const btn = document.getElementById('btn-plan-'+plan);
+  if (btn) { btn.innerHTML = '<i class="ti ti-loader-2"></i>Procesando...'; btn.disabled = true; }
+  const data = await api('/api/payments/subscribe', 'POST', { plan });
+  if (data?.init_point) {
+    showToast('Redirigiendo a Mercado Pago...');
+    setTimeout(() => { window.open(data.init_point, '_blank'); }, 500);
+  } else {
+    showToast('❌ Error al crear suscripción');
+  }
+  if (btn) { btn.innerHTML = `<i class="ti ti-credit-card"></i>Assinatura`; btn.disabled = false; }
+}
+
+async function cancelSubscription() {
+  if (!confirm('¿Cancelar tu suscripción? Perderás acceso al plan al final del período.')) return;
+  const result = await api('/api/payments/cancel', 'POST');
+  if (result?.success) {
+    showToast('Suscripción cancelada');
+    loadPlanStatus();
+  }
 }
 
 function toggleDark(){
