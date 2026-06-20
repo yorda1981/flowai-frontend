@@ -237,8 +237,7 @@ tr:hover td{background:#f9fafb}
     </div>
     <button class="auth-btn" onclick="doLogin()" id="login-btn">Entrar</button>
     <div class="auth-error" id="login-error"></div>
-    <div class="auth-switch">¿No tienes cuenta? <a onclick="showScreen('register')">Crear cuenta gratis</a></div>
-    <div class="auth-demo">Demo rápido: <a onclick="quickDemo()">admin@demo.com / 123456</a></div>
+    <div class="auth-switch">¿No tienes cuenta? <a onclick="showScreen('register')">Probar gratis 7 días</a></div>
   </div>
 </div>
 
@@ -249,7 +248,11 @@ tr:hover td{background:#f9fafb}
       <div class="auth-logo-icon"><i class="ti ti-robot"></i></div>
       <span class="auth-logo-text">FlowAI</span>
     </div>
-    <div class="auth-subtitle">Crea tu cuenta gratis en 30 segundos</div>
+    <div class="auth-subtitle">7 días gratis • 500 mensajes • Sin tarjeta</div>
+    <div style="background:linear-gradient(135deg,#667eea22,#764ba222);border:1px solid #667eea44;border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;text-align:center">
+      <div style="font-size:13px;font-weight:600;color:var(--blue)">🎁 Trial gratuito por 7 días</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:3px">Acceso completo a todas las funciones</div>
+    </div>
     <div class="auth-field">
       <label>Nombre de tu negocio</label>
       <input type="text" id="reg-name" placeholder="Ej: Clínica Bienestar" onkeydown="if(event.key==='Enter')doRegister()">
@@ -262,25 +265,9 @@ tr:hover td{background:#f9fafb}
       <label>Contraseña</label>
       <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter')doRegister()">
     </div>
-    <div style="margin-bottom:14px">
-      <div style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:8px">Elige tu plan</div>
-      <div class="plan-selector">
-        <div class="plan-opt selected" onclick="selectPlan('starter',this)">
-          <div class="plan-name">Starter</div>
-          <div class="plan-price">R$97/mes</div>
-        </div>
-        <div class="plan-opt" onclick="selectPlan('pro',this)">
-          <div class="plan-name">Pro</div>
-          <div class="plan-price">R$197/mes</div>
-        </div>
-        <div class="plan-opt" onclick="selectPlan('business',this)">
-          <div class="plan-name">Business</div>
-          <div class="plan-price">R$397/mes</div>
-        </div>
-      </div>
-    </div>
-    <button class="auth-btn" onclick="doRegister()" id="reg-btn">Crear cuenta</button>
+    <button class="auth-btn" onclick="doRegister()" id="reg-btn">🚀 Comenzar trial gratis</button>
     <div class="auth-error" id="reg-error"></div>
+    <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:10px">Sin tarjeta de crédito requerida</div>
     <div class="auth-switch">¿Ya tienes cuenta? <a onclick="showScreen('login')">Iniciar sesión</a></div>
   </div>
 </div>
@@ -314,7 +301,7 @@ tr:hover td{background:#f9fafb}
       <div class="avatar" id="user-avatar">AD</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="user-name">Admin</div>
-        <div style="font-size:11px;color:var(--text2)" id="user-email">admin@demo.com</div>
+        <div style="font-size:11px;color:var(--text2)" id="user-email"></div>
       </div>
       <i class="ti ti-logout" style="color:var(--text3);font-size:16px;cursor:pointer" onclick="doLogout()" title="Salir"></i>
     </div>
@@ -882,12 +869,6 @@ function selectPlan(plan, el) {
   el.classList.add('selected');
 }
 
-function quickDemo() {
-  document.getElementById('login-email').value = 'admin@demo.com';
-  document.getElementById('login-pass').value = '123456';
-  doLogin();
-}
-
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value;
@@ -924,14 +905,14 @@ async function doRegister() {
   try {
     const res = await fetch(`${API}/api/auth/register`, {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ name, email, password: pass, plan: selectedPlan })
+      body: JSON.stringify({ name, email, password: pass })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Error al crear cuenta');
     TOKEN = data.token; USER = data.tenant;
     localStorage.setItem('flowai_token', TOKEN);
     localStorage.setItem('flowai_user', JSON.stringify(USER));
-    showToast('¡Cuenta creada exitosamente! Bienvenido 🎉');
+    showToast('¡Cuenta creada! Tienes 7 días de trial gratuito 🎉');
     showApp();
   } catch(e) {
     err.textContent = e.message;
@@ -949,8 +930,40 @@ function showApp() {
     document.getElementById('user-avatar').textContent = (USER.name||'U').substring(0,2).toUpperCase();
     document.getElementById('plan-badge').textContent = (USER.plan||'FREE').toUpperCase();
     document.getElementById('current-plan-label').textContent = 'Plan ' + (USER.plan||'starter') + ' activo';
+    // Show trial banner if on trial
+    if (USER.plan === 'trial') {
+      const existingBanner = document.getElementById('trial-banner');
+      if (!existingBanner) {
+        const banner = document.createElement('div');
+        banner.id = 'trial-banner';
+        banner.style.cssText = 'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-align:center;padding:8px 16px;font-size:12px;font-weight:500;flex-shrink:0';
+        banner.innerHTML = '🎁 Trial gratuito activo — 500 mensajes disponibles · <a onclick="nav('plans',document.querySelector('[onclick*=plans]'))" style="color:#fff;font-weight:700;cursor:pointer;text-decoration:underline">Ver planes</a>';
+        const main = document.getElementById('app-main');
+        main.insertBefore(banner, main.firstChild);
+      }
+    }
   }
   loadDashboard();
+  checkTrialStatus();
+}
+
+async function checkTrialStatus() {
+  if (!USER || USER.plan !== 'blocked') return;
+  // Show blocked overlay
+  let overlay = document.getElementById('blocked-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'blocked-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = `<div style="background:var(--surface);border-radius:var(--radius-lg);padding:40px;max-width:400px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="font-size:48px;margin-bottom:16px">⏰</div>
+      <div style="font-size:20px;font-weight:700;margin-bottom:8px">Tu trial ha expirado</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:24px">Tu período de prueba gratuita de 7 días ha finalizado. Elige un plan para continuar usando NexaAI CRM.</div>
+      <button class="auth-btn" style="border-radius:var(--radius)" onclick="document.getElementById('blocked-overlay').remove();nav('plans',document.querySelector('[onclick*=plans]'))">Ver Planes 🚀</button>
+      <div style="font-size:11px;color:var(--text3);margin-top:12px">Contacta soporte si tienes dudas</div>
+    </div>`;
+    document.body.appendChild(overlay);
+  }
 }
 
 function doLogout() {
