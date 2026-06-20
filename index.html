@@ -34,6 +34,23 @@ body.dark{
   --purple:#7c71e8;--purple-light:#1e1d3d;
   --teal:#1a9e7a;--teal-light:#0d2820;
 }
+
+/* ONBOARDING */
+.onboarding-card{background:linear-gradient(135deg,var(--blue-light),var(--purple-light));border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:20px}
+.onboarding-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.onboarding-subtitle{font-size:12px;color:var(--text2);margin-bottom:16px}
+.onboarding-progress{background:var(--border);border-radius:10px;height:8px;margin-bottom:16px;overflow:hidden}
+.onboarding-bar{background:linear-gradient(90deg,var(--blue),var(--purple));height:100%;border-radius:10px;transition:width .4s ease}
+.onboarding-steps{display:flex;flex-direction:column;gap:8px}
+.onboarding-step{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border-radius:var(--radius);cursor:pointer;border:1px solid var(--border);transition:all .15s}
+.onboarding-step:hover{border-color:var(--blue)}
+.onboarding-step.done{opacity:.6}
+.onboarding-step .step-icon{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--text2)}
+.onboarding-step.done .step-icon{background:var(--green);border-color:var(--green);color:#fff}
+.onboarding-step .step-text{flex:1}
+.onboarding-step .step-title{font-size:13px;font-weight:500}
+.onboarding-step .step-desc{font-size:11px;color:var(--text2)}
+
 /* Lang selector */
 .lang-select{padding:5px 8px;border:1px solid var(--border2);border-radius:var(--radius);font-size:12px;background:var(--surface);color:var(--text);outline:none;cursor:pointer;font-family:inherit}
 /* Hide Google Translate bar */
@@ -332,6 +349,58 @@ tr:hover td{background:#f9fafb}
 
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
+      <div id="onboarding-section" style="display:none">
+        <div class="onboarding-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div class="onboarding-title">🚀 Configuración inicial</div>
+            <button onclick="dismissOnboarding()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;line-height:1">×</button>
+          </div>
+          <div class="onboarding-subtitle" id="onboarding-progress-text">Completa los pasos para empezar</div>
+          <div class="onboarding-progress"><div class="onboarding-bar" id="onboarding-bar" style="width:0%"></div></div>
+          <div class="onboarding-steps">
+            <div class="onboarding-step" id="step-agent" onclick="nav('agents',document.querySelector('[onclick*=agents]'))">
+              <div class="step-icon"><i class="ti ti-robot"></i></div>
+              <div class="step-text">
+                <div class="step-title">Crear un agente</div>
+                <div class="step-desc">Conecta tu número de WhatsApp</div>
+              </div>
+              <i class="ti ti-chevron-right" style="color:var(--text3);font-size:14px"></i>
+            </div>
+            <div class="onboarding-step" id="step-flow" onclick="nav('flows',document.querySelector('[onclick*=flows]'))">
+              <div class="step-icon"><i class="ti ti-topology-star"></i></div>
+              <div class="step-text">
+                <div class="step-title">Crear un flujo</div>
+                <div class="step-desc">Automatiza tus respuestas</div>
+              </div>
+              <i class="ti ti-chevron-right" style="color:var(--text3);font-size:14px"></i>
+            </div>
+            <div class="onboarding-step" id="step-contact" onclick="nav('contacts',document.querySelector('[onclick*=contacts]'))">
+              <div class="step-icon"><i class="ti ti-users"></i></div>
+              <div class="step-text">
+                <div class="step-title">Agregar un contacto</div>
+                <div class="step-desc">Importa o crea tu primer contacto</div>
+              </div>
+              <i class="ti ti-chevron-right" style="color:var(--text3);font-size:14px"></i>
+            </div>
+            <div class="onboarding-step" id="step-ai" onclick="nav('config',document.querySelector('[onclick*=config]'))">
+              <div class="step-icon"><i class="ti ti-sparkles"></i></div>
+              <div class="step-text">
+                <div class="step-title">Configurar la IA</div>
+                <div class="step-desc">Agrega tu base de conocimiento</div>
+              </div>
+              <i class="ti ti-chevron-right" style="color:var(--text3);font-size:14px"></i>
+            </div>
+            <div class="onboarding-step" id="step-campaign" onclick="nav('campaigns',document.querySelector('[onclick*=campaigns]'))">
+              <div class="step-icon"><i class="ti ti-speakerphone"></i></div>
+              <div class="step-text">
+                <div class="step-title">Enviar una campaña</div>
+                <div class="step-desc">Llega a todos tus contactos</div>
+              </div>
+              <i class="ti ti-chevron-right" style="color:var(--text3);font-size:14px"></i>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="metrics">
         <div class="metric"><div class="metric-label">Mensajes totales</div><div class="metric-value" id="m-messages">—</div><div class="mini-chart" id="mc1"></div></div>
         <div class="metric"><div class="metric-label">Contactos</div><div class="metric-value" id="m-contacts">—</div><div class="mini-chart" id="mc2"></div></div>
@@ -1010,12 +1079,62 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+function initOnboarding(stats) {
+  const dismissed = localStorage.getItem('nexaai-onboarding-dismissed');
+  if (dismissed) return;
+
+  const hasAgent = stats.total_conversations > 0 || stats.total_messages > 0;
+  const hasFlow = (stats.flows||[]).length > 0;
+  const hasContact = stats.total_contacts > 0;
+  const hasAI = false; // checked via config
+  const hasCampaign = false; // no easy way to check yet
+
+  const steps = [
+    { id: 'step-agent', done: hasAgent },
+    { id: 'step-flow', done: hasFlow },
+    { id: 'step-contact', done: hasContact },
+    { id: 'step-ai', done: hasAI },
+    { id: 'step-campaign', done: hasCampaign },
+  ];
+
+  const completed = steps.filter(s => s.done).length;
+  const total = steps.length;
+  const pct = Math.round(completed / total * 100);
+
+  // If all done, hide
+  if (completed === total) {
+    localStorage.setItem('nexaai-onboarding-dismissed', '1');
+    return;
+  }
+
+  document.getElementById('onboarding-section').style.display = 'block';
+  document.getElementById('onboarding-bar').style.width = pct + '%';
+  document.getElementById('onboarding-progress-text').textContent = 
+    completed === 0 ? 'Completa los pasos para empezar' :
+    `${completed} de ${total} pasos completados · ${pct}%`;
+
+  steps.forEach(s => {
+    const el = document.getElementById(s.id);
+    if (!el) return;
+    if (s.done) {
+      el.classList.add('done');
+      el.querySelector('.step-icon').innerHTML = '<i class="ti ti-check"></i>';
+    }
+  });
+}
+
+function dismissOnboarding() {
+  localStorage.setItem('nexaai-onboarding-dismissed', '1');
+  document.getElementById('onboarding-section').style.display = 'none';
+}
+
 async function loadDashboard() {
   const stats = await api('/api/stats'); if (!stats) return;
   document.getElementById('m-messages').textContent = (stats.total_messages||0).toLocaleString();
   document.getElementById('m-contacts').textContent = (stats.total_contacts||0).toLocaleString();
   document.getElementById('m-convs').textContent = (stats.total_conversations||0).toLocaleString();
   document.getElementById('m-flows').textContent = (stats.flows||[]).filter(f=>f.status==='active').length;
+  initOnboarding(stats);
   ['mc1','mc2','mc3','mc4'].forEach((id,i)=>{
     const el=document.getElementById(id); if(!el)return;
     const d=[[40,55,48,70,65,80,75],[30,45,40,55,60,58,72],[2,2,3,3,3,3,3],[1,1,1,1,2,2,2]][i];
