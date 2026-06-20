@@ -937,7 +937,7 @@ function showApp() {
         const banner = document.createElement('div');
         banner.id = 'trial-banner';
         banner.style.cssText = 'background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-align:center;padding:8px 16px;font-size:12px;font-weight:500;flex-shrink:0';
-        banner.innerHTML = '🎁 Trial gratuito activo — 500 mensajes disponibles · <a onclick="nav('plans',document.querySelector('[onclick*=plans]'))" style="color:#fff;font-weight:700;cursor:pointer;text-decoration:underline">Ver planes</a>';
+        banner.innerHTML = "🎁 Trial gratuito activo — 500 mensajes disponibles · <a onclick=\"nav('plans',document.querySelector('[onclick*=plans]'))\" style=\"color:#fff;font-weight:700;cursor:pointer;text-decoration:underline\">Ver planes</a>";
         const main = document.getElementById('app-main');
         main.insertBefore(banner, main.firstChild);
       }
