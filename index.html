@@ -2067,7 +2067,7 @@ async function saveAppointment() {
   loadAgenda();
 }
 
-
+function toggleDark(){
   const dark=document.body.classList.toggle('dark');
   localStorage.setItem('flowai-dark', dark?'1':'0');
   document.getElementById('dark-icon').className=dark?'ti ti-sun':'ti ti-moon';
