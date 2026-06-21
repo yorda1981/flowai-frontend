@@ -1,1 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowAI — Super Admin</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--border:#2d3148;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --blue:#3b82f6;--blue-dark:#2563eb;
+  --green:#22c55e;--green-light:rgba(34,197,94,.1);
+  --red:#ef4444;--red-light:rgba(239,68,68,.1);
+  --amber:#f59e0b;--amber-light:rgba(245,158,11,.1);
+  --purple:#a855f7;--purple-light:rgba(168,85,247,.1);
+  --radius:8px;--radius-lg:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--text);background:var(--bg);min-height:100vh}
 
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100}
+.login-screen.hidden{display:none}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px;width:380px}
+.login-title{font-size:20px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.login-subtitle{font-size:13px;color:var(--text2);margin-bottom:28px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.field input{width:100%;padding:10px 12px;background:#0f1117;border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;font-family:inherit;outline:none}
+.field input:focus{border-color:var(--blue)}
+.login-btn{width:100%;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.login-btn:hover{background:var(--blue-dark)}
+.login-error{color:var(--red);font-size:12px;margin-top:10px;text-align:center;min-height:16px}
+
+/* APP */
+.app{display:none}
+.app.visible{display:block}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:10}
+.topbar-logo{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.topbar-logo span{background:var(--blue);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px}
+.topbar-stats{display:flex;gap:20px;margin-left:auto}
+.topbar-stat{text-align:center}
+.topbar-stat .val{font-size:18px;font-weight:700;color:var(--blue)}
+.topbar-stat .lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.logout-btn{padding:6px 12px;background:transparent;border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;font-size:12px;font-family:inherit}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+
+.content{padding:24px;max-width:1400px;margin:0 auto}
+.section-title{font-size:16px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+/* CLIENTS TABLE */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:24px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:10px 16px;text-align:left;font-weight:600;font-size:11px;color:var(--text3);border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);text-transform:uppercase;letter-spacing:.5px}
+td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+
+.badge{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:600}
+.badge.green{background:var(--green-light);color:var(--green)}
+.badge.red{background:var(--red-light);color:var(--red)}
+.badge.amber{background:var(--amber-light);color:var(--amber)}
+.badge.blue{background:rgba(59,130,246,.1);color:var(--blue)}
+.badge.purple{background:var(--purple-light);color:var(--purple)}
+
+.btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-size:12px;background:transparent;color:var(--text2);font-family:inherit;transition:all .15s}
+.btn:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.btn.danger{border-color:var(--red);color:var(--red)}
+.btn.danger:hover{background:var(--red-light)}
+.btn.success{border-color:var(--green);color:var(--green)}
+.btn.success:hover{background:var(--green-light)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:var(--blue-dark)}
+
+.progress{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;width:100px}
+.progress-fill{height:100%;border-radius:3px;transition:width .3s}
+
+.loading{text-align:center;padding:40px;color:var(--text3);font-size:13px}
+.toast{position:fixed;bottom:24px;right:24px;background:#1e293b;border:1px solid var(--border);color:var(--text);padding:10px 18px;border-radius:var(--radius);font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+
+.search-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.search-input{flex:1;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;font-family:inherit;outline:none}
+.search-input:focus{border-color:var(--blue)}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;width:420px}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:16px}
+.modal-actions{display:flex;gap:8px;margin-top:20px;justify-content:flex-end}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-title">
+      <i class="ti ti-shield-lock" style="color:var(--blue);font-size:22px"></i>
+      FlowAI Super Admin
+    </div>
+    <div class="login-subtitle">Panel exclusivo de administración</div>
+    <div class="field">
+      <label>Clave de administrador</label>
+      <input type="password" id="admin-key" placeholder="••••••••••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Acceder</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <i class="ti ti-robot" style="color:var(--blue)"></i>
+      FlowAI <span>ADMIN</span>
+    </div>
+    <div class="topbar-stats">
+      <div class="topbar-stat"><div class="val" id="gs-tenants">—</div><div class="lbl">Clientes</div></div>
+      <div class="topbar-stat"><div class="val" id="gs-messages">—</div><div class="lbl">Mensajes</div></div>
+      <div class="topbar-stat"><div class="val" id="gs-contacts">—</div><div class="lbl">Contactos</div></div>
+      <div class="topbar-stat"><div class="val" id="gs-agents" style="color:var(--green)">—</div><div class="lbl">Agentes activos</div></div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()"><i class="ti ti-logout"></i> Salir</button>
+  </div>
+
+  <div class="content">
+    <div class="search-bar">
+      <div class="section-title" style="margin:0"><i class="ti ti-users" style="color:var(--blue)"></i> Clientes</div>
+      <input class="search-input" placeholder="Buscar cliente..." oninput="filterClients(this.value)" style="max-width:300px">
+      <button class="btn primary" onclick="loadData()"><i class="ti ti-refresh"></i> Actualizar</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Email</th>
+            <th>Plan</th>
+            <th>Tokens usados</th>
+            <th>Estado</th>
+            <th>Registro</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="clients-table">
+          <tr><td colspan="7"><div class="loading"><i class="ti ti-loader-2"></i> Cargando...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal cambiar plan -->
+<div class="modal-overlay" id="plan-modal">
+  <div class="modal">
+    <div class="modal-title">Cambiar plan</div>
+    <input type="hidden" id="modal-tenant-id">
+    <div class="field">
+      <label>Selecciona plan</label>
+      <select id="plan-select" style="width:100%;padding:10px 12px;background:#0f1117;border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;outline:none">
+        <option value="starter">Starter — R$97/mes (10k tokens)</option>
+        <option value="pro">Pro — R$197/mes (50k tokens)</option>
+        <option value="business">Business — R$397/mes (100k tokens)</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closePlanModal()">Cancelar</button>
+      <button class="btn primary" onclick="savePlan()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://flowai-server-production.up.railway.app';
+const PLAN_TOKENS = { starter: 10000, pro: 50000, business: 100000, free: 5000 };
+const PLAN_COLORS = { starter: 'blue', pro: 'purple', business: 'amber', free: 'green' };
+let ADMIN_KEY = '';
+let allClients = [];
+
+function doLogin() {
+  const key = document.getElementById('admin-key').value.trim();
+  if (!key) { document.getElementById('login-error').textContent = 'Ingresa la clave'; return; }
+  ADMIN_KEY = key;
+  loadData();
+}
+
+function doLogout() {
+  ADMIN_KEY = '';
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('admin-key').value = '';
+}
+
+async function adminApi(path, method='GET', body=null) {
+  const opts = { method, headers: { 'x-admin-key': ADMIN_KEY, 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${API}${path}`, opts);
+  if (res.status === 401) {
+    document.getElementById('login-error').textContent = 'Clave incorrecta';
+    return null;
+  }
+  return res.json();
+}
+
+async function loadData() {
+  const [stats, clients] = await Promise.all([
+    adminApi('/api/admin/stats'),
+    adminApi('/api/admin/tenants')
+  ]);
+
+  if (!stats || !clients) return;
+
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('login-error').textContent = '';
+
+  document.getElementById('gs-tenants').textContent = stats.total_tenants;
+  document.getElementById('gs-messages').textContent = stats.total_messages.toLocaleString();
+  document.getElementById('gs-contacts').textContent = stats.total_contacts.toLocaleString();
+  document.getElementById('gs-agents').textContent = stats.active_agents;
+
+  allClients = clients;
+  renderClients(clients);
+}
+
+function renderClients(list) {
+  const tbody = document.getElementById('clients-table');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="loading">No hay clientes</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map(c => {
+    const tokensLimit = PLAN_TOKENS[c.plan] || 5000;
+    const tokensUsed = c.tokens_used || 0;
+    const pct = Math.min(100, Math.round((tokensUsed / tokensLimit) * 100));
+    const barColor = pct >= 90 ? '#ef4444' : pct >= 70 ? '#f59e0b' : '#3b82f6';
+    const date = new Date(c.created_at).toLocaleDateString('es', { day:'2-digit', month:'short', year:'numeric' });
+    const active = c.active !== false;
+
+    return `<tr>
+      <td><div style="font-weight:600">${c.name}</div></td>
+      <td style="color:var(--text2)">${c.email}</td>
+      <td><span class="badge ${PLAN_COLORS[c.plan]||'blue'}">${(c.plan||'free').toUpperCase()}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="progress"><div class="progress-fill" style="width:${pct}%;background:${barColor}"></div></div>
+          <span style="font-size:12px;color:var(--text2)">${tokensUsed.toLocaleString()}/${tokensLimit.toLocaleString()}</span>
+        </div>
+      </td>
+      <td><span class="badge ${active?'green':'red'}">${active?'Activo':'Inactivo'}</span></td>
+      <td style="color:var(--text2);font-size:12px">${date}</td>
+      <td>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="btn ${active?'danger':'success'}" onclick="${active?`deactivate('${c.id}')`:`activate('${c.id}')`}">
+            <i class="ti ti-${active?'ban':'check'}"></i>${active?'Desactivar':'Activar'}
+          </button>
+          <button class="btn" onclick="openPlanModal('${c.id}','${c.plan||'starter'}')">
+            <i class="ti ti-credit-card"></i>Plan
+          </button>
+          <button class="btn" onclick="resetTokens('${c.id}')">
+            <i class="ti ti-refresh"></i>Tokens
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterClients(q) {
+  const f = q.toLowerCase();
+  renderClients(allClients.filter(c =>
+    c.name.toLowerCase().includes(f) || c.email.toLowerCase().includes(f)
+  ));
+}
+
+async function deactivate(id) {
+  if (!confirm('¿Desactivar este cliente?')) return;
+  await adminApi(`/api/admin/tenants/${id}/toggle`, 'POST', { active: false });
+  showToast('Cliente desactivado');
+  loadData();
+}
+
+async function activate(id) {
+  await adminApi(`/api/admin/tenants/${id}/toggle`, 'POST', { active: true });
+  showToast('Cliente activado ✓');
+  loadData();
+}
+
+async function resetTokens(id) {
+  if (!confirm('¿Resetear tokens a 0?')) return;
+  await adminApi(`/api/admin/tenants/${id}/reset-tokens`, 'POST');
+  showToast('Tokens reseteados ✓');
+  loadData();
+}
+
+function openPlanModal(id, plan) {
+  document.getElementById('modal-tenant-id').value = id;
+  document.getElementById('plan-select').value = plan;
+  document.getElementById('plan-modal').classList.add('show');
+}
+
+function closePlanModal() {
+  document.getElementById('plan-modal').classList.remove('show');
+}
+
+async function savePlan() {
+  const id = document.getElementById('modal-tenant-id').value;
+  const plan = document.getElementById('plan-select').value;
+  await adminApi(`/api/admin/tenants/${id}/plan`, 'POST', { plan });
+  closePlanModal();
+  showToast('Plan actualizado ✓');
+  loadData();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
