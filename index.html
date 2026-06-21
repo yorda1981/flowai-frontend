@@ -715,8 +715,11 @@ tr:hover td{background:#f9fafb}
             <div style="display:flex;gap:8px">
               <button class="btn" onclick="campSelectAll()" style="font-size:12px"><i class="ti ti-checks"></i>Seleccionar todos</button>
               <button class="btn" onclick="campClearAll()" style="font-size:12px"><i class="ti ti-x"></i>Limpiar</button>
+              <button class="btn" onclick="document.getElementById('csv-import-input').click()" style="font-size:12px;color:var(--blue);border-color:var(--blue)"><i class="ti ti-file-import"></i>Importar CSV</button>
+              <input type="file" id="csv-import-input" accept=".csv" style="display:none" onchange="importCampCSV(this)">
             </div>
           </div>
+          <div id="csv-import-info" style="display:none;font-size:12px;color:var(--green);margin-bottom:8px;padding:6px 10px;background:var(--green-light);border-radius:var(--radius)"></div>
           <div style="margin:12px 0;font-size:13px;color:var(--text2)" id="camp-count">0 contactos seleccionados</div>
           <!-- Filtro por etiqueta -->
           <div id="camp-label-filters" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
@@ -2100,6 +2103,75 @@ let campContacts = [];
 let campSelected = new Set();
 let campAllLabels = [];
 let campActiveLabel = 'all';
+
+function importCampCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const lines = e.target.result.split('\n').filter(l => l.trim());
+    if (!lines.length) { showToast('CSV vazio'); return; }
+    
+    // Detect header
+    const firstLine = lines[0].toLowerCase();
+    const hasHeader = firstLine.includes('nome') || firstLine.includes('telefone') || firstLine.includes('phone') || firstLine.includes('name');
+    const dataLines = hasHeader ? lines.slice(1) : lines;
+    
+    let imported = 0;
+    let skipped = 0;
+    
+    dataLines.forEach(line => {
+      const cols = line.split(/[,;\t]/).map(c => c.trim().replace(/"/g, ''));
+      if (!cols.length) return;
+      
+      // Try to find phone and name
+      let phone = '';
+      let name = '';
+      
+      if (cols.length === 1) {
+        // Only phone
+        phone = cols[0].replace(/\D/g, '');
+      } else if (cols.length >= 2) {
+        // Check which column is phone (has digits)
+        const col0digits = cols[0].replace(/\D/g, '');
+        const col1digits = cols[1].replace(/\D/g, '');
+        if (col0digits.length >= 8) {
+          phone = col0digits;
+          name = cols[1];
+        } else if (col1digits.length >= 8) {
+          phone = col1digits;
+          name = cols[0];
+        } else {
+          phone = col0digits || col1digits;
+          name = cols[0];
+        }
+      }
+      
+      if (!phone || phone.length < 8) { skipped++; return; }
+      
+      // Add to campContacts if not already there
+      const exists = campContacts.find(c => c.phone.replace(/\D/g, '') === phone);
+      if (!exists) {
+        campContacts.push({ id: 'csv_' + phone, name: name || phone, phone });
+        campSelected.add('csv_' + phone);
+        imported++;
+      } else {
+        campSelected.add(exists.id);
+        imported++;
+      }
+    });
+    
+    renderCampContacts(campContacts);
+    updateCampCount();
+    
+    const info = document.getElementById('csv-import-info');
+    info.style.display = 'block';
+    info.textContent = `✅ ${imported} contatos importados do CSV${skipped > 0 ? ` (${skipped} ignorados por telefone inválido)` : ''}`;
+    
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
 
 async function loadCampaigns() {
   const data = await api('/api/contacts') || [];
