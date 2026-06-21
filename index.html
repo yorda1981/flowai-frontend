@@ -35,6 +35,32 @@ body.dark{
   --teal:#1a9e7a;--teal-light:#0d2820;
 }
 
+
+/* TUTORIALS */
+.tut-hero{background:linear-gradient(135deg,var(--blue-light),var(--purple-light, rgba(139,92,246,.08)));border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;margin-bottom:24px;text-align:center}
+.tut-hero h2{font-size:22px;font-weight:800;margin-bottom:8px}
+.tut-hero p{font-size:14px;color:var(--text2)}
+.tut-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;margin-bottom:24px}
+.tut-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color .2s,transform .2s}
+.tut-card:hover{border-color:var(--blue);transform:translateY(-2px)}
+.tut-card-header{padding:20px;display:flex;align-items:center;gap:14px}
+.tut-emoji{font-size:32px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:12px;flex-shrink:0}
+.tut-card-title{font-size:15px;font-weight:700}
+.tut-card-sub{font-size:12px;color:var(--text2);margin-top:3px}
+.tut-flow{padding:0 20px 20px}
+.tut-steps{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.tut-step{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text2);padding:6px 8px;background:var(--bg);border-radius:6px}
+.tut-step-num{width:18px;height:18px;border-radius:50%;background:var(--blue);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.tut-step-text{flex:1}
+.tut-step-text strong{color:var(--text);font-weight:600}
+.tut-arrow{text-align:center;color:var(--text3);font-size:12px;margin:2px 0}
+.tut-use-btn{width:100%;padding:9px;background:linear-gradient(135deg,var(--blue),#6366f1);color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.tut-use-btn:hover{opacity:.85}
+.tut-tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;margin-right:4px;margin-bottom:4px}
+.tut-tag.blue{background:rgba(59,130,246,.1);color:var(--blue)}
+.tut-tag.green{background:var(--green-light);color:var(--green)}
+.tut-tag.amber{background:var(--amber-light);color:var(--amber)}
+
 /* ONBOARDING */
 .onboarding-card{background:linear-gradient(135deg,var(--blue-light),var(--purple-light));border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:20px}
 .onboarding-title{font-size:15px;font-weight:700;margin-bottom:4px}
@@ -309,6 +335,7 @@ tr:hover td{background:#f9fafb}
     <div class="nav-item" onclick="nav('plans',this)"><i class="ti ti-credit-card"></i>Planes</div>
     <div class="nav-item" onclick="nav('ai',this)"><i class="ti ti-sparkles"></i>Asistente IA</div>
     <div class="nav-item" onclick="nav('config',this)"><i class="ti ti-settings"></i>Configuración</div>
+    <div class="nav-item" onclick="nav('tutorials',this)"><i class="ti ti-school"></i>Tutoriais</div>
   </div>
   <div class="sidebar-footer">
     <div class="user-row">
@@ -910,6 +937,259 @@ Aceptamos: Efectivo, tarjeta, transferencia."></textarea>
         <div class="card-hdr"><span class="card-title">Servidor</span><span class="badge green">Online</span></div>
         <div style="background:#f3f4f6;border-radius:var(--radius);padding:10px 14px;font-family:monospace;font-size:12px">https://flowai-server-production.up.railway.app</div>
       </div>
+
+    <div class="page" id="page-tutorials">
+      <div class="tut-hero">
+        <div style="font-size:40px;margin-bottom:12px">🎓</div>
+        <h2>Tutoriais & Modelos de Fluxo</h2>
+        <p>Escolha o modelo ideal para o seu negócio e configure em minutos. Clique em "Usar este fluxo" para criar automaticamente.</p>
+      </div>
+
+      <div class="tut-grid">
+
+        <!-- CLÍNICAS -->
+        <div class="tut-card">
+          <div class="tut-card-header">
+            <div class="tut-emoji">🏥</div>
+            <div>
+              <div class="tut-card-title">Clínicas e Consultórios</div>
+              <div class="tut-card-sub">Agendamento automático de consultas</div>
+              <div style="margin-top:6px">
+                <span class="tut-tag blue">Agendamento</span>
+                <span class="tut-tag green">IA</span>
+                <span class="tut-tag amber">Lembrete</span>
+              </div>
+            </div>
+          </div>
+          <div class="tut-flow">
+            <div class="tut-steps">
+              <div class="tut-step"><div class="tut-step-num">1</div><div class="tut-step-text"><strong>Início</strong> — Cliente manda mensagem</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">2</div><div class="tut-step-text"><strong>Mensagem</strong> — "Olá! Bem-vindo à nossa clínica. Como posso ajudar?"</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">3</div><div class="tut-step-text"><strong>Capturar</strong> — Nome do paciente</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">4</div><div class="tut-step-text"><strong>IA</strong> — Responde dúvidas sobre procedimentos e preços</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">5</div><div class="tut-step-text"><strong>Agendamento</strong> — Bot agenda consulta automaticamente</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">6</div><div class="tut-step-text"><strong>Final</strong> — Confirmação enviada ao paciente</div></div>
+            </div>
+            <button class="tut-use-btn" onclick="useTutorialFlow('clinica')">📋 Usar este fluxo</button>
+          </div>
+        </div>
+
+        <!-- SALÕES -->
+        <div class="tut-card">
+          <div class="tut-card-header">
+            <div class="tut-emoji">✂️</div>
+            <div>
+              <div class="tut-card-title">Salões e Barbearias</div>
+              <div class="tut-card-sub">Agenda online pelo WhatsApp</div>
+              <div style="margin-top:6px">
+                <span class="tut-tag blue">Agendamento</span>
+                <span class="tut-tag green">Automático</span>
+              </div>
+            </div>
+          </div>
+          <div class="tut-flow">
+            <div class="tut-steps">
+              <div class="tut-step"><div class="tut-step-num">1</div><div class="tut-step-text"><strong>Início</strong> — Cliente manda mensagem</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">2</div><div class="tut-step-text"><strong>Mensagem</strong> — "Olá! Quer agendar um horário?"</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">3</div><div class="tut-step-text"><strong>Capturar</strong> — Nome do cliente</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">4</div><div class="tut-step-text"><strong>Agendamento</strong> — Serviço, data e horário</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">5</div><div class="tut-step-text"><strong>Final</strong> — "Horário confirmado! Te esperamos 😊"</div></div>
+            </div>
+            <button class="tut-use-btn" onclick="useTutorialFlow('salao')">📋 Usar este fluxo</button>
+          </div>
+        </div>
+
+        <!-- RESTAURANTES -->
+        <div class="tut-card">
+          <div class="tut-card-header">
+            <div class="tut-emoji">🍕</div>
+            <div>
+              <div class="tut-card-title">Restaurantes e Delivery</div>
+              <div class="tut-card-sub">Receba pedidos automaticamente</div>
+              <div style="margin-top:6px">
+                <span class="tut-tag blue">Pedidos</span>
+                <span class="tut-tag amber">Delivery</span>
+              </div>
+            </div>
+          </div>
+          <div class="tut-flow">
+            <div class="tut-steps">
+              <div class="tut-step"><div class="tut-step-num">1</div><div class="tut-step-text"><strong>Início</strong> — Cliente manda mensagem</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">2</div><div class="tut-step-text"><strong>Mensagem</strong> — "Olá! Bem-vindo. Qual seu pedido hoje?"</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">3</div><div class="tut-step-text"><strong>IA</strong> — Responde sobre cardápio e preços</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">4</div><div class="tut-step-text"><strong>Capturar</strong> — Endereço de entrega</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">5</div><div class="tut-step-text"><strong>Final</strong> — "Pedido recebido! Tempo estimado: 40 min"</div></div>
+            </div>
+            <button class="tut-use-btn" onclick="useTutorialFlow('restaurante')">📋 Usar este fluxo</button>
+          </div>
+        </div>
+
+        <!-- IMOBILIÁRIAS -->
+        <div class="tut-card">
+          <div class="tut-card-header">
+            <div class="tut-emoji">🏠</div>
+            <div>
+              <div class="tut-card-title">Imobiliárias</div>
+              <div class="tut-card-sub">Qualificação automática de leads</div>
+              <div style="margin-top:6px">
+                <span class="tut-tag blue">Leads</span>
+                <span class="tut-tag green">CRM</span>
+                <span class="tut-tag amber">Vendas</span>
+              </div>
+            </div>
+          </div>
+          <div class="tut-flow">
+            <div class="tut-steps">
+              <div class="tut-step"><div class="tut-step-num">1</div><div class="tut-step-text"><strong>Início</strong> — Lead manda mensagem</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">2</div><div class="tut-step-text"><strong>Capturar</strong> — Nome do interessado</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">3</div><div class="tut-step-text"><strong>IA</strong> — Qualifica: compra, aluguel, bairro, orçamento</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">4</div><div class="tut-step-text"><strong>Agendamento</strong> — Visita ao imóvel</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">5</div><div class="tut-step-text"><strong>Final</strong> — "Corretor entrará em contato em breve!"</div></div>
+            </div>
+            <button class="tut-use-btn" onclick="useTutorialFlow('imobiliaria')">📋 Usar este fluxo</button>
+          </div>
+        </div>
+
+        <!-- OFICINAS -->
+        <div class="tut-card">
+          <div class="tut-card-header">
+            <div class="tut-emoji">🚗</div>
+            <div>
+              <div class="tut-card-title">Oficinas Mecânicas</div>
+              <div class="tut-card-sub">Orçamentos e agendamentos automáticos</div>
+              <div style="margin-top:6px">
+                <span class="tut-tag blue">Orçamento</span>
+                <span class="tut-tag green">Agendamento</span>
+              </div>
+            </div>
+          </div>
+          <div class="tut-flow">
+            <div class="tut-steps">
+              <div class="tut-step"><div class="tut-step-num">1</div><div class="tut-step-text"><strong>Início</strong> — Cliente manda mensagem</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">2</div><div class="tut-step-text"><strong>Mensagem</strong> — "Olá! Qual serviço você precisa?"</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">3</div><div class="tut-step-text"><strong>Capturar</strong> — Modelo do carro e problema</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">4</div><div class="tut-step-text"><strong>IA</strong> — Estimativa de preço e prazo</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">5</div><div class="tut-step-text"><strong>Agendamento</strong> — Data para trazer o carro</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">6</div><div class="tut-step-text"><strong>Final</strong> — "Agendado! Te esperamos 🔧"</div></div>
+            </div>
+            <button class="tut-use-btn" onclick="useTutorialFlow('oficina')">📋 Usar este fluxo</button>
+          </div>
+        </div>
+
+        <!-- ESTÉTICA -->
+        <div class="tut-card">
+          <div class="tut-card-header">
+            <div class="tut-emoji">💆</div>
+            <div>
+              <div class="tut-card-title">Estética e Beleza</div>
+              <div class="tut-card-sub">Agenda de procedimentos estéticos</div>
+              <div style="margin-top:6px">
+                <span class="tut-tag blue">Agendamento</span>
+                <span class="tut-tag green">IA</span>
+              </div>
+            </div>
+          </div>
+          <div class="tut-flow">
+            <div class="tut-steps">
+              <div class="tut-step"><div class="tut-step-num">1</div><div class="tut-step-text"><strong>Início</strong> — Cliente manda mensagem</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">2</div><div class="tut-step-text"><strong>Mensagem</strong> — "Olá linda! Qual procedimento deseja?"</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">3</div><div class="tut-step-text"><strong>IA</strong> — Explica procedimentos e preços</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">4</div><div class="tut-step-text"><strong>Capturar</strong> — Nome da cliente</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">5</div><div class="tut-step-text"><strong>Agendamento</strong> — Data e horário do procedimento</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">6</div><div class="tut-step-text"><strong>Final</strong> — "Confirmado! Te esperamos ✨"</div></div>
+            </div>
+            <button class="tut-use-btn" onclick="useTutorialFlow('estetica')">📋 Usar este fluxo</button>
+          </div>
+        </div>
+
+        <!-- LOJAS -->
+        <div class="tut-card">
+          <div class="tut-card-header">
+            <div class="tut-emoji">🛍️</div>
+            <div>
+              <div class="tut-card-title">Lojas e Comércio</div>
+              <div class="tut-card-sub">Atendimento e vendas automáticas</div>
+              <div style="margin-top:6px">
+                <span class="tut-tag blue">Vendas</span>
+                <span class="tut-tag amber">Campanhas</span>
+              </div>
+            </div>
+          </div>
+          <div class="tut-flow">
+            <div class="tut-steps">
+              <div class="tut-step"><div class="tut-step-num">1</div><div class="tut-step-text"><strong>Início</strong> — Cliente manda mensagem</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">2</div><div class="tut-step-text"><strong>Mensagem</strong> — "Olá! Bem-vindo à nossa loja 🛍️"</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">3</div><div class="tut-step-text"><strong>IA</strong> — Responde sobre produtos, tamanhos e preços</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">4</div><div class="tut-step-text"><strong>Capturar</strong> — Email para cadastro</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">5</div><div class="tut-step-text"><strong>Final</strong> — "Obrigado! Enviaremos promoções exclusivas 🎁"</div></div>
+            </div>
+            <button class="tut-use-btn" onclick="useTutorialFlow('loja')">📋 Usar este fluxo</button>
+          </div>
+        </div>
+
+        <!-- PRESTADORES -->
+        <div class="tut-card">
+          <div class="tut-card-header">
+            <div class="tut-emoji">🔧</div>
+            <div>
+              <div class="tut-card-title">Prestadores de Serviço</div>
+              <div class="tut-card-sub">Orçamentos rápidos pelo WhatsApp</div>
+              <div style="margin-top:6px">
+                <span class="tut-tag blue">Orçamento</span>
+                <span class="tut-tag green">Leads</span>
+              </div>
+            </div>
+          </div>
+          <div class="tut-flow">
+            <div class="tut-steps">
+              <div class="tut-step"><div class="tut-step-num">1</div><div class="tut-step-text"><strong>Início</strong> — Cliente manda mensagem</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">2</div><div class="tut-step-text"><strong>Capturar</strong> — Nome e endereço</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">3</div><div class="tut-step-text"><strong>IA</strong> — Coleta detalhes do serviço necessário</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">4</div><div class="tut-step-text"><strong>Agendamento</strong> — Visita técnica</div></div>
+              <div class="tut-arrow">↓</div>
+              <div class="tut-step"><div class="tut-step-num">5</div><div class="tut-step-text"><strong>Final</strong> — "Orçamento enviado em breve! ✅"</div></div>
+            </div>
+            <button class="tut-use-btn" onclick="useTutorialFlow('servicos')">📋 Usar este fluxo</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     </div>
 
   </div>
@@ -1059,7 +1339,7 @@ function nav(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+id)?.classList.add('active');
   if (el) el.classList.add('active');
-  const titles={dashboard:'Dashboard',agents:'Agentes',flows:'Flujos',contacts:'Contactos CRM',messages:'Mensajes',agenda:'Agenda',blocked:'Números Bloqueados',campaigns:'Campañas',stats:'Estadísticas',plans:'Planes',ai:'Asistente IA',config:'Configuración'};
+  const titles={dashboard:'Dashboard',agents:'Agentes',flows:'Flujos',contacts:'Contactos CRM',messages:'Mensajes',agenda:'Agenda',blocked:'Números Bloqueados',campaigns:'Campañas',stats:'Estadísticas',plans:'Planes',ai:'Asistente IA',config:'Configuración',tutorials:'Tutoriais & Modelos de Fluxo'};
   document.getElementById('page-title').textContent = titles[id]||id;
   if (id==='contacts') loadContacts();
   if (id==='agenda') loadAgenda();
@@ -1126,6 +1406,36 @@ function initOnboarding(stats) {
 function dismissOnboarding() {
   localStorage.setItem('nexaai-onboarding-dismissed', '1');
   document.getElementById('onboarding-section').style.display = 'none';
+}
+
+
+const TUTORIAL_FLOWS = {"clinica": {"name": "Cl\u00ednica - Agendamento", "nodes": [{"id": "n1", "type": "start", "x": 100, "y": 100, "label": "In\u00edcio", "sub": ""}, {"id": "n2", "type": "message", "x": 280, "y": 100, "label": "Boas-vindas", "sub": "Ol\u00e1! Bem-vindo \u00e0 nossa cl\u00ednica \ud83c\udfe5 Como posso ajudar voc\u00ea hoje?"}, {"id": "n3", "type": "capture", "x": 460, "y": 100, "label": "Capturar nome", "sub": "Qual \u00e9 o seu nome?", "field": "name"}, {"id": "n4", "type": "ai", "x": 640, "y": 100, "label": "Assistente IA", "sub": "Voc\u00ea \u00e9 um assistente am\u00e1vel de uma cl\u00ednica m\u00e9dica. Responda d\u00favidas sobre procedimentos, pre\u00e7os e hor\u00e1rios. Se o paciente quiser agendar, diga que vai ajud\u00e1-lo."}, {"id": "n5", "type": "end", "x": 820, "y": 100, "label": "Fim", "sub": "Obrigado pelo contato! Em caso de d\u00favidas estamos aqui. \ud83d\ude0a"}]}, "salao": {"name": "Sal\u00e3o - Agendamento", "nodes": [{"id": "n1", "type": "start", "x": 100, "y": 100, "label": "In\u00edcio", "sub": ""}, {"id": "n2", "type": "message", "x": 280, "y": 100, "label": "Boas-vindas", "sub": "Ol\u00e1! \ud83d\udc88 Quer agendar um hor\u00e1rio no nosso sal\u00e3o? Ser\u00e1 um prazer te atender!"}, {"id": "n3", "type": "capture", "x": 460, "y": 100, "label": "Capturar nome", "sub": "Qual \u00e9 o seu nome?", "field": "name"}, {"id": "n4", "type": "ai", "x": 640, "y": 100, "label": "Assistente IA", "sub": "Voc\u00ea \u00e9 um assistente de um sal\u00e3o de beleza. Ajude o cliente a escolher o servi\u00e7o, informe pre\u00e7os e hor\u00e1rios dispon\u00edveis. Seja simp\u00e1tico e use emojis."}, {"id": "n5", "type": "end", "x": 820, "y": 100, "label": "Fim", "sub": "Hor\u00e1rio confirmado! Te esperamos com carinho \u2728"}]}, "restaurante": {"name": "Restaurante - Pedidos", "nodes": [{"id": "n1", "type": "start", "x": 100, "y": 100, "label": "In\u00edcio", "sub": ""}, {"id": "n2", "type": "message", "x": 280, "y": 100, "label": "Boas-vindas", "sub": "Ol\u00e1! \ud83c\udf55 Bem-vindo ao nosso restaurante! Qual ser\u00e1 o seu pedido hoje?"}, {"id": "n3", "type": "ai", "x": 460, "y": 100, "label": "Assistente IA", "sub": "Voc\u00ea \u00e9 um atendente de restaurante. Ajude o cliente com o card\u00e1pio, pre\u00e7os e pedidos. Ap\u00f3s o pedido, pergunte o endere\u00e7o de entrega."}, {"id": "n4", "type": "capture", "x": 640, "y": 100, "label": "Capturar endere\u00e7o", "sub": "Qual \u00e9 o endere\u00e7o de entrega?", "field": "endereco"}, {"id": "n5", "type": "end", "x": 820, "y": 100, "label": "Fim", "sub": "Pedido recebido! \u2705 Tempo estimado de entrega: 40 minutos. Obrigado!"}]}, "imobiliaria": {"name": "Imobili\u00e1ria - Leads", "nodes": [{"id": "n1", "type": "start", "x": 100, "y": 100, "label": "In\u00edcio", "sub": ""}, {"id": "n2", "type": "message", "x": 280, "y": 100, "label": "Boas-vindas", "sub": "Ol\u00e1! \ud83c\udfe0 Bem-vindo. Estamos aqui para ajudar voc\u00ea a encontrar o im\u00f3vel ideal!"}, {"id": "n3", "type": "capture", "x": 460, "y": 100, "label": "Capturar nome", "sub": "Qual \u00e9 o seu nome?", "field": "name"}, {"id": "n4", "type": "ai", "x": 640, "y": 100, "label": "Assistente IA", "sub": "Voc\u00ea \u00e9 um corretor de im\u00f3veis virtual. Qualifique o lead perguntando: tipo de im\u00f3vel (compra/aluguel), bairro preferido, or\u00e7amento e n\u00famero de quartos. Seja profissional."}, {"id": "n5", "type": "end", "x": 820, "y": 100, "label": "Fim", "sub": "Obrigado! Um de nossos corretores entrar\u00e1 em contato em breve. \ud83c\udfe1"}]}, "oficina": {"name": "Oficina - Or\u00e7amentos", "nodes": [{"id": "n1", "type": "start", "x": 100, "y": 100, "label": "In\u00edcio", "sub": ""}, {"id": "n2", "type": "message", "x": 280, "y": 100, "label": "Boas-vindas", "sub": "Ol\u00e1! \ud83d\udd27 Bem-vindo \u00e0 nossa oficina. Qual servi\u00e7o voc\u00ea precisa?"}, {"id": "n3", "type": "capture", "x": 460, "y": 100, "label": "Capturar carro", "sub": "Qual \u00e9 o modelo e ano do seu carro?", "field": "carro"}, {"id": "n4", "type": "ai", "x": 640, "y": 100, "label": "Assistente IA", "sub": "Voc\u00ea \u00e9 um mec\u00e2nico virtual. Colete informa\u00e7\u00f5es sobre o problema do carro, d\u00ea estimativas de pre\u00e7o e prazo. Seja t\u00e9cnico mas acess\u00edvel."}, {"id": "n5", "type": "end", "x": 820, "y": 100, "label": "Fim", "sub": "Agendamento confirmado! Te esperamos na oficina \ud83d\ude97"}]}, "estetica": {"name": "Est\u00e9tica - Agenda", "nodes": [{"id": "n1", "type": "start", "x": 100, "y": 100, "label": "In\u00edcio", "sub": ""}, {"id": "n2", "type": "message", "x": 280, "y": 100, "label": "Boas-vindas", "sub": "Ol\u00e1! \u2728 Bem-vinda ao nosso studio de est\u00e9tica. Qual procedimento voc\u00ea deseja?"}, {"id": "n3", "type": "ai", "x": 460, "y": 100, "label": "Assistente IA", "sub": "Voc\u00ea \u00e9 um assistente de um studio de est\u00e9tica. Explique os procedimentos dispon\u00edveis, pre\u00e7os e cuidados. Seja simp\u00e1tico e use emojis de beleza."}, {"id": "n4", "type": "capture", "x": 640, "y": 100, "label": "Capturar nome", "sub": "Qual \u00e9 o seu nome?", "field": "name"}, {"id": "n5", "type": "end", "x": 820, "y": 100, "label": "Fim", "sub": "Agendamento confirmado! Te esperamos com carinho \ud83d\udc86\u200d\u2640\ufe0f"}]}, "loja": {"name": "Loja - Atendimento", "nodes": [{"id": "n1", "type": "start", "x": 100, "y": 100, "label": "In\u00edcio", "sub": ""}, {"id": "n2", "type": "message", "x": 280, "y": 100, "label": "Boas-vindas", "sub": "Ol\u00e1! \ud83d\udecd\ufe0f Bem-vindo \u00e0 nossa loja! Como posso ajudar voc\u00ea hoje?"}, {"id": "n3", "type": "ai", "x": 460, "y": 100, "label": "Assistente IA", "sub": "Voc\u00ea \u00e9 um vendedor virtual de uma loja. Ajude o cliente com informa\u00e7\u00f5es sobre produtos, tamanhos, cores e pre\u00e7os. Seja amig\u00e1vel e incentive a compra."}, {"id": "n4", "type": "capture", "x": 640, "y": 100, "label": "Capturar email", "sub": "Qual \u00e9 o seu email para receber nossas promo\u00e7\u00f5es?", "field": "email"}, {"id": "n5", "type": "end", "x": 820, "y": 100, "label": "Fim", "sub": "Obrigado! Voc\u00ea receber\u00e1 nossas ofertas exclusivas em breve \ud83c\udf81"}]}, "servicos": {"name": "Servi\u00e7os - Or\u00e7amento", "nodes": [{"id": "n1", "type": "start", "x": 100, "y": 100, "label": "In\u00edcio", "sub": ""}, {"id": "n2", "type": "message", "x": 280, "y": 100, "label": "Boas-vindas", "sub": "Ol\u00e1! \ud83d\udd27 Bem-vindo. Qual servi\u00e7o voc\u00ea precisa?"}, {"id": "n3", "type": "capture", "x": 460, "y": 100, "label": "Capturar nome", "sub": "Qual \u00e9 o seu nome?", "field": "name"}, {"id": "n4", "type": "capture", "x": 640, "y": 100, "label": "Capturar endere\u00e7o", "sub": "Qual \u00e9 o seu endere\u00e7o?", "field": "endereco"}, {"id": "n5", "type": "ai", "x": 820, "y": 100, "label": "Assistente IA", "sub": "Voc\u00ea \u00e9 um prestador de servi\u00e7os. Colete detalhes do servi\u00e7o necess\u00e1rio e d\u00ea uma estimativa de prazo. Seja profissional."}, {"id": "n6", "type": "end", "x": 1000, "y": 100, "label": "Fim", "sub": "Or\u00e7amento enviado em breve! \u2705 Obrigado pelo contato."}]}};
+
+async function useTutorialFlow(type) {
+  const flow = TUTORIAL_FLOWS[type];
+  if (!flow) return;
+  if (!confirm(`Criar o fluxo "${flow.name}" automaticamente?`)) return;
+  
+  try {
+    const res = await fetch(API + '/api/flows', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+TOKEN},
+      body: JSON.stringify({
+        name: flow.name,
+        status: 'active',
+        nodes: flow.nodes,
+        edges: []
+      })
+    });
+    if (res.ok) {
+      showToast('Fluxo "' + flow.name + '" criado com sucesso! ✅');
+      setTimeout(() => nav('flows', document.querySelector('[onclick*=flows]')), 1500);
+    } else {
+      showToast('Erro ao criar fluxo. Tente novamente.');
+    }
+  } catch(e) {
+    showToast('Erro ao criar fluxo.');
+  }
 }
 
 async function loadDashboard() {
