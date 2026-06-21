@@ -1645,10 +1645,16 @@ async function deleteContact(id){
 
 let allFlows=[];
 async function loadFlows(){const data=await api('/api/flows');allFlows=data||[];renderFlows(allFlows);}
+async function deleteFlow(id, name){
+  if(!confirm('¿Eliminar el flujo "'+name+'"?')) return;
+  await api('/api/flows/'+id,'DELETE');
+  showToast('Flujo eliminado ✓');
+  loadFlows();
+}
 function renderFlows(list){
   document.getElementById('flows-grid').innerHTML=list.length===0
     ?'<div style="grid-column:1/-1;text-align:center;color:var(--text2);padding:40px">No hay flujos. Crea el primero.</div>'
-    :list.map(f=>`<div class="card" style="cursor:pointer" onclick="openBuilder('${f.id}','${f.name}')"><div class="card-hdr"><span class="card-title" style="font-size:13px">${f.name}</span><span class="badge ${f.status==='active'?'green':'amber'}">${f.status==='active'?'Activo':'Borrador'}</span></div><div style="font-size:12px;color:var(--text2);margin-top:6px"><i class="ti ti-topology-star" style="font-size:13px;vertical-align:-2px"></i> ${(f.nodes||[]).length} nodos · ${f.executions||0} ejecuciones</div></div>`).join('');
+    :list.map(f=>`<div class="card"><div class="card-hdr"><span class="card-title" style="font-size:13px;cursor:pointer" onclick="openBuilder('${f.id}','${f.name}')">${f.name}</span><div style="display:flex;align-items:center;gap:8px"><span class="badge ${f.status==='active'?'green':'amber'}">${f.status==='active'?'Activo':'Borrador'}</span><button onclick="deleteFlow('${f.id}','${f.name}')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:16px;padding:2px 4px" title="Eliminar"><i class="ti ti-trash"></i></button></div></div><div style="font-size:12px;color:var(--text2);margin-top:6px;cursor:pointer" onclick="openBuilder('${f.id}','${f.name}')"><i class="ti ti-topology-star" style="font-size:13px;vertical-align:-2px"></i> ${(f.nodes||[]).length} nodos · ${f.executions||0} ejecuciones</div></div>`).join('');
 }
 function filterFlows(type,el){
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
