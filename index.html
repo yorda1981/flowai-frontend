@@ -1748,9 +1748,16 @@ function selectNode(id){
     <input class="prop-input" value="${n.label||''}" oninput="flowNodes.find(x=>x.id===${id}).label=this.value;renderCanvas()">
     ${extraFields}
     <div style="margin-top:16px">
-      <button class="btn" style="width:100%;justify-content:center;color:var(--red)" onclick="flowNodes=flowNodes.filter(x=>x.id!==${id});renderCanvas();document.getElementById('flow-props').innerHTML='<div class=empty-state>Nodo eliminado</div>'"><i class="ti ti-trash"></i>Eliminar</button>
+      <button class="btn" style="width:100%;justify-content:center;color:var(--red)" onclick="deleteFlowNode('${id}')"><i class="ti ti-trash"></i>Eliminar</button>
     </div>`;
 }
+
+function deleteFlowNode(id) {
+  flowNodes = flowNodes.filter(x => x.id !== id);
+  renderCanvas();
+  document.getElementById('flow-props').innerHTML = '<div class="empty-state">Selecciona un nodo para editarlo</div>';
+}
+
 document.getElementById('flow-canvas').addEventListener('dragover',e=>e.preventDefault());
 document.getElementById('flow-canvas').addEventListener('drop',e=>{
   e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;
