@@ -345,7 +345,7 @@ tr:hover td{background:#f9fafb}
     <div class="nav-item" onclick="nav('stats',this)"><i class="ti ti-chart-bar"></i>Estadísticas</div>
     <div class="nav-item" onclick="nav('plans',this)"><i class="ti ti-credit-card"></i>Planes</div>
     <div class="nav-item" onclick="nav('ai',this)"><i class="ti ti-sparkles"></i>Asistente IA</div>
-    <div class="nav-item" onclick="nav('config',this)"><i class="ti ti-settings"></i>Configuración</div>
+    <div class="nav-item" onclick="nav('config',this);setTimeout(()=>{if(typeof loadFollowup==='function')loadFollowup();},100)"><i class="ti ti-settings"></i>Configuración</div>
     <div class="nav-item" onclick="nav('tutorials',this)"><i class="ti ti-school"></i>Tutoriais</div>
   </div>
   <div class="sidebar-footer">
@@ -960,6 +960,30 @@ Aceptamos: Efectivo, tarjeta, transferencia."></textarea>
         <div style="background:#f3f4f6;border-radius:var(--radius);padding:10px 14px;font-family:monospace;font-size:12px">https://flowai-server-production.up.railway.app</div>
       </div>
 
+      <!-- FOLLOW-UP AUTOMÁTICO -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-hdr">
+          <div>
+            <span class="card-title">🔁 Follow-up Automático</span>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">Envie mensagens para contatos que não responderam</div>
+          </div>
+        </div>
+        <div style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:16px;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="background:var(--blue-light);color:var(--blue);padding:3px 10px;border-radius:10px;font-weight:600">Contato envia msg</span>
+          <i class="ti ti-arrow-right" style="color:var(--text3)"></i>
+          <span style="background:var(--amber-light);color:var(--amber);padding:3px 10px;border-radius:10px;font-weight:600">Sem resposta → Follow-up 1</span>
+          <i class="ti ti-arrow-right" style="color:var(--text3)"></i>
+          <span style="background:var(--amber-light);color:var(--amber);padding:3px 10px;border-radius:10px;font-weight:600">Follow-up 2</span>
+          <i class="ti ti-arrow-right" style="color:var(--text3)"></i>
+          <span style="background:var(--red-light);color:var(--red);padding:3px 10px;border-radius:10px;font-weight:600">Fechar conversa</span>
+        </div>
+        <div id="followup-rules-list" style="margin-bottom:14px"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="addFollowupRule()" style="font-size:13px"><i class="ti ti-plus"></i> Adicionar mensagem</button>
+          <button class="btn primary" id="save-followup-btn" onclick="saveFollowup()" style="font-size:13px"><i class="ti ti-device-floppy"></i> Salvar follow-up</button>
+        </div>
+      </div>
+
     </div>
 
     <div class="page" id="page-tutorials">
@@ -1236,5 +1260,6 @@ Aceptamos: Efectivo, tarjeta, transferencia."></textarea>
 <script src="js/blocked.js" defer></script>
 <script src="js/agenda.js" defer></script>
 <script src="js/config.js" defer></script>
+<script src="js/followup_ui.js" defer></script>
 </body>
 </html>
