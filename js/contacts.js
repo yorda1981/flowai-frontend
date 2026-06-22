@@ -176,3 +176,70 @@ async function deleteContact(id){
   await api(`/api/contacts/${id}`,'DELETE');
   showToast('Contacto eliminado'); loadContacts();
 }
+
+async function importContactsCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const lines = e.target.result.split('\n').filter(l => l.trim());
+    if (!lines.length) { showToast('CSV vazio'); return; }
+
+    // Detect header
+    const firstLine = lines[0].toLowerCase();
+    const hasHeader = firstLine.includes('nome') || firstLine.includes('telefone') || 
+                      firstLine.includes('phone') || firstLine.includes('name') ||
+                      firstLine.includes('número');
+    const dataLines = hasHeader ? lines.slice(1) : lines;
+
+    let imported = 0;
+    let skipped = 0;
+    let errors = 0;
+
+    showToast('Importando contatos...');
+
+    for (const line of dataLines) {
+      if (!line.trim()) continue;
+      const cols = line.split(/[,;\\t]/).map(c => c.trim().replace(/"/g, ''));
+      if (!cols.length) continue;
+
+      let phone = '';
+      let name = '';
+
+      if (cols.length === 1) {
+        phone = cols[0].replace(/\\D/g, '');
+      } else {
+        const col0digits = cols[0].replace(/\\D/g, '');
+        const col1digits = cols[1] ? cols[1].replace(/\\D/g, '') : '';
+        if (col0digits.length >= 8) {
+          phone = col0digits;
+          name = cols[1] || '';
+        } else if (col1digits.length >= 8) {
+          phone = col1digits;
+          name = cols[0] || '';
+        } else {
+          skipped++;
+          continue;
+        }
+      }
+
+      if (!phone || phone.length < 8) { skipped++; continue; }
+
+      try {
+        await api('/api/contacts', 'POST', {
+          name: name || phone,
+          phone,
+          channel: 'whatsapp'
+        });
+        imported++;
+      } catch(e) {
+        errors++;
+      }
+    }
+
+    input.value = '';
+    loadContacts();
+    showToast(`✅ ${imported} contatos importados${skipped > 0 ? ` · ${skipped} ignorados` : ''}${errors > 0 ? ` · ${errors} erros` : ''}`);
+  };
+  reader.readAsText(file);
+}
