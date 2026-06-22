@@ -7,45 +7,24 @@ function importCampCSV(input) {
   reader.onload = function(e) {
     const lines = e.target.result.split('\n').filter(l => l.trim());
     if (!lines.length) { showToast('CSV vazio'); return; }
-    
-    // Detect header
     const firstLine = lines[0].toLowerCase();
     const hasHeader = firstLine.includes('nome') || firstLine.includes('telefone') || firstLine.includes('phone') || firstLine.includes('name');
     const dataLines = hasHeader ? lines.slice(1) : lines;
-    
-    let imported = 0;
-    let skipped = 0;
-    
+    let imported = 0, skipped = 0;
     dataLines.forEach(line => {
       const cols = line.split(/[,;\t]/).map(c => c.trim().replace(/"/g, ''));
       if (!cols.length) return;
-      
-      // Try to find phone and name
-      let phone = '';
-      let name = '';
-      
+      let phone = '', name = '';
       if (cols.length === 1) {
-        // Only phone
         phone = cols[0].replace(/\D/g, '');
-      } else if (cols.length >= 2) {
-        // Check which column is phone (has digits)
+      } else {
         const col0digits = cols[0].replace(/\D/g, '');
         const col1digits = cols[1].replace(/\D/g, '');
-        if (col0digits.length >= 8) {
-          phone = col0digits;
-          name = cols[1];
-        } else if (col1digits.length >= 8) {
-          phone = col1digits;
-          name = cols[0];
-        } else {
-          phone = col0digits || col1digits;
-          name = cols[0];
-        }
+        if (col0digits.length >= 8) { phone = col0digits; name = cols[1]; }
+        else if (col1digits.length >= 8) { phone = col1digits; name = cols[0]; }
+        else { phone = col0digits || col1digits; name = cols[0]; }
       }
-      
       if (!phone || phone.length < 8) { skipped++; return; }
-      
-      // Add to campContacts if not already there
       const exists = campContacts.find(c => c.phone.replace(/\D/g, '') === phone);
       if (!exists) {
         campContacts.push({ id: 'csv_' + phone, name: name || phone, phone });
@@ -56,14 +35,10 @@ function importCampCSV(input) {
         imported++;
       }
     });
-    
     renderCampContacts(campContacts);
     updateCampCount();
-    
     const info = document.getElementById('csv-import-info');
-    info.style.display = 'block';
-    info.textContent = `✅ ${imported} contatos importados do CSV${skipped > 0 ? ` (${skipped} ignorados por telefone inválido)` : ''}`;
-    
+    if (info) { info.style.display = 'block'; info.textContent = `✅ ${imported} contatos importados${skipped > 0 ? ` (${skipped} ignorados)` : ''}`; }
     input.value = '';
   };
   reader.readAsText(file);
@@ -71,9 +46,7 @@ function importCampCSV(input) {
 
 async function loadCampaigns() {
   const data = await api('/api/contacts') || [];
-  // Filtrar grupos y números inválidos
   campContacts = data.filter(c => c.phone && !c.phone.includes('@g.us') && !c.phone.includes('@lid') && !c.phone.includes('-'));
-  // Extraer etiquetas únicas
   campAllLabels = [...new Set(campContacts.flatMap(c => c.tags || []))].filter(Boolean);
   renderLabelFilters();
 }
@@ -131,21 +104,11 @@ function campToggle(id) {
   renderCampContacts(campContacts);
 }
 
-function campSelectAll() {
-  campContacts.forEach(c => campSelected.add(c.id));
-  renderCampContacts(campContacts);
-}
-
-function campClearAll() {
-  campSelected.clear();
-  renderCampContacts(campContacts);
-}
-
+function campSelectAll() { campContacts.forEach(c => campSelected.add(c.id)); renderCampContacts(campContacts); }
+function campClearAll() { campSelected.clear(); renderCampContacts(campContacts); }
 function campSearch(q) {
   const filtered = campContacts.filter(c =>
-    (c.name||'').toLowerCase().includes(q.toLowerCase()) ||
-    (c.phone||'').includes(q)
-  );
+    (c.name||'').toLowerCase().includes(q.toLowerCase()) || (c.phone||'').includes(q));
   renderCampContacts(filtered);
 }
 
@@ -159,6 +122,7 @@ function campStep3() {
   const name = document.getElementById('camp-name').value.trim();
   const msg = document.getElementById('camp-message').value.trim();
   const interval = parseInt(document.getElementById('camp-interval').value) || 5;
+  const scheduled = document.getElementById('camp-schedule')?.value;
   const totalSecs = campSelected.size * interval;
   const mins = Math.floor(totalSecs / 60);
   const secs = totalSecs % 60;
@@ -167,6 +131,16 @@ function campStep3() {
   document.getElementById('camp-rev-interval').textContent = interval + ' segundos';
   document.getElementById('camp-rev-time').textContent = mins > 0 ? `~${mins}m ${secs}s` : `~${secs}s`;
   document.getElementById('camp-rev-msg').textContent = msg;
+
+  // Show scheduled time if set
+  const schedEl = document.getElementById('camp-rev-schedule');
+  if (schedEl && scheduled) {
+    schedEl.style.display = '';
+    schedEl.textContent = '📅 Agendado para: ' + new Date(scheduled).toLocaleString('pt-BR');
+  } else if (schedEl) {
+    schedEl.style.display = 'none';
+  }
+
   document.getElementById('camp-step-2').style.display = 'none';
   document.getElementById('camp-step-3').style.display = 'block';
 }
@@ -179,8 +153,32 @@ function campBack2() {
 async function startCampaign() {
   const msg = document.getElementById('camp-message').value.trim();
   const interval = parseInt(document.getElementById('camp-interval').value) || 5;
+  const scheduled = document.getElementById('camp-schedule')?.value;
   const selectedContacts = campContacts.filter(c => campSelected.has(c.id));
 
+  // Se agendado, salvar e mostrar confirmação
+  if (scheduled) {
+    const schedDate = new Date(scheduled);
+    const now = new Date();
+    if (schedDate <= now) { showToast('❌ A data de agendamento deve ser no futuro'); return; }
+    const delayMs = schedDate - now;
+    showToast(`📅 Campanha agendada para ${schedDate.toLocaleString('pt-BR')}`);
+    document.getElementById('camp-prog-text').textContent = `⏰ Agendada para ${schedDate.toLocaleString('pt-BR')}`;
+    document.getElementById('camp-progress-wrap').style.display = 'block';
+    document.getElementById('camp-ready-msg').style.display = 'none';
+
+    // Schedule with setTimeout
+    setTimeout(async () => {
+      await executeCampaign(selectedContacts, msg, interval);
+    }, delayMs);
+    return;
+  }
+
+  // Envio imediato
+  await executeCampaign(selectedContacts, msg, interval);
+}
+
+async function executeCampaign(selectedContacts, msg, interval) {
   document.getElementById('camp-send-btn').disabled = true;
   document.getElementById('camp-ready-msg').style.display = 'none';
   document.getElementById('camp-progress-wrap').style.display = 'block';
@@ -190,7 +188,8 @@ async function startCampaign() {
   let sent = 0;
 
   for (const contact of selectedContacts) {
-    const text = msg.replace(/\{nombre\}/gi, contact.name || contact.phone);
+    const text = msg.replace(/\{nombre\}/gi, contact.name || contact.phone)
+                    .replace(/\{nome\}/gi, contact.name || contact.phone);
     try {
       await api('/api/campaigns/send', 'POST', { phone: contact.phone, message: text });
       sent++;
@@ -206,7 +205,7 @@ async function startCampaign() {
     if (sent < selectedContacts.length) await new Promise(r => setTimeout(r, interval * 1000));
   }
 
-  document.getElementById('camp-prog-text').textContent = `✅ Campaña completada — ${sent} mensajes enviados`;
+  document.getElementById('camp-prog-text').textContent = `✅ Campanha concluída — ${sent} mensagens enviadas`;
   document.getElementById('camp-send-btn').disabled = false;
-  showToast(`✅ Campaña enviada a ${sent} contactos`);
+  showToast(`✅ Campanha enviada a ${sent} contatos`);
 }
