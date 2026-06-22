@@ -445,6 +445,10 @@ tr:hover td{background:#f9fafb}
         <div class="metric"><div class="metric-label">Conversaciones</div><div class="metric-value" id="m-convs">—</div><div class="mini-chart" id="mc3"></div></div>
         <div class="metric"><div class="metric-label">Flujos activos</div><div class="metric-value" id="m-flows">—</div><div class="mini-chart" id="mc4"></div></div>
       </div>
+
+      <!-- CARDS EXECUTIVOS -->
+      <div id="exec-cards"></div>
+
       <div class="grid2">
         <div class="card">
           <div class="card-hdr"><span class="card-title">Flujos recientes</span><span class="badge blue">Datos reales</span></div>
@@ -457,9 +461,18 @@ tr:hover td{background:#f9fafb}
           <button class="btn" style="width:100%;justify-content:center" onclick="nav('contacts',null)"><i class="ti ti-users"></i>Ver todos</button>
         </div>
       </div>
-      <div class="card">
-        <div class="card-hdr"><span class="card-title">Actividad de mensajes</span></div>
-        <div class="chart-bar" id="hourly-chart"></div>
+
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px">
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Mensagens — últimos 7 dias</span><span class="badge green">Dados reais</span></div>
+          <div class="chart-bar" id="hourly-chart" style="height:150px"></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Pipeline de vendas</span></div>
+          <div id="pipeline-mini"><div class="loading"><i class="ti ti-loader-2"></i></div></div>
+          <div class="divider"></div>
+          <button class="btn" style="width:100%;justify-content:center;font-size:12px" onclick="nav('contacts',null);setTimeout(()=>setContactView('kanban'),100)"><i class="ti ti-layout-kanban"></i>Ver pipeline completo</button>
+        </div>
       </div>
     </div>
 
