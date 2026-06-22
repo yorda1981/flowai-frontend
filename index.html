@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NexaAI CRM — Plataforma CRM</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link rel="preload" href="js/init.js" as="script">
+<link rel="preload" href="js/utils.js" as="script">
+<link rel="preload" href="js/dashboard.js" as="script">
+<link rel="preload" href="js/contacts.js" as="script">
+<link rel="preload" href="js/flows.js" as="script">
+<link rel="preload" href="js/agents.js" as="script">
+<link rel="preload" href="js/messages.js" as="script">
+<link rel="preload" href="js/campaigns.js" as="script">
+<link rel="preload" href="js/blocked.js" as="script">
+<link rel="preload" href="js/agenda.js" as="script">
+<link rel="preload" href="js/config.js" as="script">
 <script>
 function googleTranslateElementInit(){
   new google.translate.TranslateElement({pageLanguage:'es',includedLanguages:'es,en,pt,fr,de,it,ar,zh-CN,ja,ru',autoDisplay:false},'gte');
@@ -510,6 +521,8 @@ tr:hover td{background:#f9fafb}
           <button class="btn" id="view-kanban-btn" onclick="setContactView('kanban')" style="padding:4px 10px;font-size:12px;border:none"><i class="ti ti-layout-kanban"></i> Pipeline</button>
         </div>
         <button class="btn primary" onclick="showAddContact()"><i class="ti ti-user-plus"></i>Nuevo contacto</button>
+        <button class="btn" onclick="document.getElementById('contacts-csv-input').click()" style="font-size:12px;color:var(--blue);border-color:var(--blue)"><i class="ti ti-file-import"></i>Importar CSV</button>
+        <input type="file" id="contacts-csv-input" accept=".csv" style="display:none" onchange="importContactsCSV(this)">
       </div>
       <!-- Vista Lista -->
       <div id="contacts-list-view">
