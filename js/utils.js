@@ -142,7 +142,7 @@ function nav(id, el) {
   if (id==='messages') loadConversations();
   if (id==='blocked') loadBlocked();
   if (id==='campaigns') loadCampaigns();
-  if (id==='config') { loadTokenUsage(); loadKnowledgeBase(); }
+  if (id==='config') { loadTokenUsage(); loadKnowledgeBase(); if(typeof loadFollowup==='function') loadFollowup(); }
   if (id==='plans') loadPlanStatus();
 }
 
