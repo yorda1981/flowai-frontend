@@ -1,5 +1,55 @@
 // NexaAI CRM — messages.js
 
+// ─── RESPOSTAS RÁPIDAS ───
+const QUICK_REPLIES = [
+  { cmd: '/horario', text: '🕐 Nosso horário de atendimento é de segunda a sexta, das 8h às 18h, e sábados das 8h às 12h.' },
+  { cmd: '/preco', text: '💰 Para informações sobre preços e orçamentos, por favor nos diga qual serviço você precisa!' },
+  { cmd: '/localizacao', text: '📍 Estamos localizados em [SUA CIDADE]. Envie "maps" para receber nossa localização.' },
+  { cmd: '/promocao', text: '🎉 Confira nossas promoções especiais! Entre em contato para saber mais.' },
+  { cmd: '/whatsapp', text: '📱 Você pode nos contatar por aqui mesmo pelo WhatsApp, qualquer dúvida estamos à disposição!' },
+];
+
+function showQuickReplies() {
+  const panel = document.getElementById('quick-replies-panel');
+  if (!panel) return;
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function useQuickReply(text) {
+  const inp = document.getElementById('chat-input');
+  if (inp) {
+    inp.value = text;
+    inp.focus();
+  }
+  const panel = document.getElementById('quick-replies-panel');
+  if (panel) panel.style.display = 'none';
+}
+
+function checkQuickReply(e) {
+  const inp = document.getElementById('chat-input');
+  const val = inp.value;
+  const panel = document.getElementById('quick-replies-panel');
+  if (!panel) return;
+
+  if (val.startsWith('/')) {
+    const filtered = QUICK_REPLIES.filter(r => r.cmd.includes(val.toLowerCase()));
+    if (filtered.length > 0) {
+      panel.innerHTML = filtered.map(r => `
+        <div onclick="useQuickReply('${r.text.replace(/'/g,"\\'")}');inp=document.getElementById('chat-input');inp.value='${r.text.replace(/'/g,"\\'")}'" 
+          style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s"
+          onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background=''">
+          <div style="font-size:12px;font-weight:600;color:var(--blue)">${r.cmd}</div>
+          <div style="font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.text}</div>
+        </div>`).join('');
+      panel.style.display = 'block';
+    } else {
+      panel.style.display = 'none';
+    }
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
 async function loadConversations(){
   const data = await api('/api/messages/conversations') || [];
   const seen = new Map();
@@ -39,17 +89,14 @@ async function openConv(convId, name, phone, status) {
   activeConvId = convId;
   activePhone = phone;
   activeStatus = status;
-  // Highlight selected
   document.querySelectorAll('[id^="conv-item-"]').forEach(el => el.style.background = '');
   const item = document.getElementById('conv-item-' + convId);
   if (item) item.style.background = '#e8f0fb';
 
-  // Mostrar panel chat
   document.getElementById('chat-empty').style.display = 'none';
   const active = document.getElementById('chat-active');
   active.style.display = 'flex';
 
-  // Header
   document.getElementById('chat-avatar').textContent = name.substring(0,2).toUpperCase();
   document.getElementById('chat-name').textContent = name;
   document.getElementById('chat-phone').textContent = phone;
@@ -58,7 +105,23 @@ async function openConv(convId, name, phone, status) {
   document.getElementById('btn-take').style.display = status === 'bot' ? '' : 'none';
   document.getElementById('btn-bot').style.display = status === 'open' ? '' : 'none';
 
-  // Cargar mensajes
+  // Setup quick replies panel
+  const inputArea = document.getElementById('chat-input-area');
+  if (inputArea && !document.getElementById('quick-replies-panel')) {
+    const panel = document.createElement('div');
+    panel.id = 'quick-replies-panel';
+    panel.style.cssText = 'display:none;position:absolute;bottom:60px;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 16px rgba(0,0,0,.1);max-height:200px;overflow-y:auto;z-index:10';
+    inputArea.style.position = 'relative';
+    inputArea.appendChild(panel);
+
+    // Add quick reply button
+    const chatInput = document.getElementById('chat-input');
+    if (chatInput) {
+      chatInput.setAttribute('oninput', 'checkQuickReply(event)');
+      chatInput.placeholder = 'Mensagem... (/ para atalhos)';
+    }
+  }
+
   const msgs = document.getElementById('chat-messages');
   msgs.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;padding:10px">Cargando mensajes...</div>';
 
