@@ -1758,7 +1758,7 @@ function selectNode(id){
   document.getElementById('flow-props').innerHTML=`
     <div style="font-weight:600;font-size:13px;margin-bottom:14px;color:${nodeTypeColor[n.type]}">${nodeTypeLabel[n.type]}</div>
     <div class="prop-label">Nombre</div>
-    <input class="prop-input" value="${n.label||''}" oninput="flowNodes.find(x=>x.id===${id}).label=this.value;renderCanvas()">
+    <input class="prop-input" value="${n.label||''}" oninput="flowNodes.find(x=>String(x.id)===String(${id})).label=this.value;renderCanvas()">
     ${extraFields}
     <div style="margin-top:16px">
       <button class="btn" style="width:100%;justify-content:center;color:var(--red)" onclick="deleteFlowNode('${id}')"><i class="ti ti-trash"></i>Eliminar</button>
@@ -1766,7 +1766,7 @@ function selectNode(id){
 }
 
 function deleteFlowNode(id) {
-  flowNodes = flowNodes.filter(x => x.id !== id);
+  flowNodes = flowNodes.filter(x => String(x.id) !== String(id));
   renderCanvas();
   document.getElementById('flow-props').innerHTML = '<div class="empty-state">Selecciona un nodo para editarlo</div>';
 }
@@ -1775,7 +1775,7 @@ document.getElementById('flow-canvas').addEventListener('dragover',e=>e.preventD
 document.getElementById('flow-canvas').addEventListener('drop',e=>{
   e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;
   const rect=document.getElementById('flow-canvas').getBoundingClientRect();const id=Date.now();
-  flowNodes.push({id,type,x:e.clientX-rect.left-75,y:e.clientY-rect.top-35,label:nodeTypeLabel[type],sub:'Configura este nodo'});
+  flowNodes.push({id:String(id),type,x:e.clientX-rect.left-75,y:e.clientY-rect.top-35,label:nodeTypeLabel[type],sub:'Configura este nodo'});
   renderCanvas();showToast('Nodo añadido');
 });
 document.querySelectorAll('.node-tpl').forEach(t=>t.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',t.dataset.type)));
