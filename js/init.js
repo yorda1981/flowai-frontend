@@ -1,9 +1,9 @@
 // NexaAI CRM — init.js (variáveis globais)
 
 const API = 'https://flowai-server-production.up.railway.app';
-let TOKEN = localStorage.getItem('nexaai_token');
-let USER = JSON.parse(localStorage.getItem('nexaai_user') || 'null');
-let selectedPlan = 'starter';
+var TOKEN = localStorage.getItem('nexaai_token');
+var USER = JSON.parse(localStorage.getItem('nexaai_user') || 'null');
+var selectedPlan = 'starter';
 const aiHistory = [];
 
 
@@ -26,12 +26,10 @@ const TUTORIAL_FLOWS = {"clinica": {"name": "Cl\u00ednica - Agendamento", "nodes
 
 
 
-let allContacts=[];
-let allLabels=[];
+var allContacts=[];
+var allLabels=[];
 
-let contactView = 'list';
-
-
+var contactView = 'list';
 
 
 
@@ -40,12 +38,14 @@ let contactView = 'list';
 
 
 
-let allFlows=[];
+
+
+var allFlows=[];
 
 const nodeColors={start:'#E1F5EE',message:'#E6F1FB',button:'#FAEEDA',ai:'#EEEDFE',condition:'#FCEBEB',end:'#f3f4f6',wait:'#f3f4f6',api:'#EEEDFE'};
 const nodeTypeLabel={start:'Inicio',message:'Mensaje',button:'Botones',ai:'Acción IA',condition:'Condición',end:'Final',wait:'Espera',api:'API ext.',capture:'Capturar dato'};
 const nodeTypeColor={start:'#0F6E56',message:'#185FA5',button:'#854F0B',ai:'#534AB7',condition:'#A32D2D',end:'#6b7280',wait:'#6b7280',api:'#534AB7',capture:'#0F6E56'};
-let flowNodes=[],flowEdges=[],selectedNodeId=null,currentFlowId=null;
+var flowNodes=[],flowEdges=[],selectedNodeId=null,currentFlowId=null;
 const defaultFlow=[{id:0,type:'start',x:30,y:110,label:'Inicio',sub:'Mensaje entrante'},{id:1,type:'message',x:220,y:50,label:'Bienvenida',sub:'Hola, ¿en qué te ayudo?'},{id:2,type:'ai',x:420,y:50,label:'Respuesta IA',sub:'Eres un asistente amable. Responde brevemente.'},{id:3,type:'end',x:610,y:50,label:'Fin',sub:'Conversación cerrada'}];
 const defaultEdges=[[0,1],[1,2],[2,3]];
 
@@ -68,10 +68,10 @@ document.querySelectorAll('.node-tpl').forEach(t=>t.addEventListener('dragstart'
 
 
 
-let allConvs = [];
-let activeConvId = null;
-let activePhone = null;
-let activeStatus = null;
+var allConvs = [];
+var activeConvId = null;
+var activePhone = null;
+var activeStatus = null;
 
 
 
@@ -87,8 +87,8 @@ let activeStatus = null;
 
 
 // ── CAMPAÑAS ──
-let campContacts = [];
-let campSelected = new Set();
+var campContacts = [];
+var campSelected = new Set();
 let campAllLabels = [];
 let campActiveLabel = 'all';
 
@@ -111,9 +111,9 @@ let campActiveLabel = 'all';
 
 
 // ─── AGENDA ───────────────────────────────────────
-let agendaView = 'week';
+var agendaView = 'week';
 let agendaDate = new Date();
-let allAppointments = [];
+var allAppointments = [];
 let editingAppointmentId = null;
 
 
