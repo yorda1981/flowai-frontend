@@ -132,7 +132,7 @@ function nav(id, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+id)?.classList.add('active');
   if (el) el.classList.add('active');
-  const titles={dashboard:'Dashboard',agents:'Agentes',flows:'Flujos',contacts:'Contactos CRM',messages:'Mensajes',agenda:'Agenda',blocked:'Números Bloqueados',campaigns:'Campañas',stats:'Estadísticas',plans:'Planes',ai:'Asistente IA',config:'Configuración',tutorials:'Tutoriais & Modelos de Fluxo'};
+  const titles={dashboard:'Dashboard',agents:'Agentes',flows:'Flujos',contacts:'Contactos CRM',messages:'Mensajes',agenda:'Agenda',blocked:'Números Bloqueados',campaigns:'Campañas',forms:'Formulários',stats:'Estadísticas',plans:'Planes',ai:'Asistente IA',config:'Configuración',tutorials:'Tutoriais & Modelos de Fluxo'};
   document.getElementById('page-title').textContent = titles[id]||id;
   if (id==='contacts') loadContacts();
   if (id==='agenda') loadAgenda();
