@@ -13,8 +13,7 @@ const aiHistory = [];
 
 
 
-if (TOKEN && USER) showApp();
-else showScreen('login');
+// Inicialização movida para DOMContentLoaded
 
 
 
@@ -154,3 +153,10 @@ let editingAppointmentId = null;
     });
   }
 })();
+
+
+// Inicializa depois de todos os módulos carregarem
+document.addEventListener('DOMContentLoaded', function() {
+  if (TOKEN && USER) showApp();
+  else showScreen('login');
+});
