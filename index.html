@@ -1013,6 +1013,22 @@ tr:hover td{background:#f9fafb}
         <div style="font-size:13px;color:var(--text2);margin-bottom:12px">
           Escribe aquí la información de tu negocio — productos, precios, horarios, preguntas frecuentes. El bot usará este contenido para responder a tus clientes.
         </div>
+
+        <!-- Upload de arquivo -->
+        <div style="background:var(--bg);border:2px dashed var(--border2);border-radius:var(--radius);padding:14px;margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;margin-bottom:2px">📄 Importar arquivo</div>
+              <div style="font-size:11px;color:var(--text2)">PDF, Word (.docx), Excel (.xlsx), TXT, CSV — até 10MB</div>
+            </div>
+            <input type="file" id="doc-upload-input" accept=".pdf,.docx,.doc,.xlsx,.xls,.txt,.csv" style="display:none" onchange="uploadKnowledgeDoc(this)">
+            <button class="btn primary" id="upload-doc-btn" onclick="document.getElementById('doc-upload-input').click()" style="font-size:13px;white-space:nowrap">
+              <i class="ti ti-upload"></i> Importar arquivo
+            </button>
+          </div>
+          <div id="upload-doc-status" style="display:none;margin-top:10px"></div>
+        </div>
+
         <textarea id="knowledge-base" style="width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-family:inherit;outline:none;resize:vertical;min-height:180px;background:var(--bg);color:var(--text)" placeholder="Ejemplo:
 Somos una clínica dental en São Paulo.
 Horario: Lunes a Viernes 8am-6pm, Sábados 8am-1pm.
@@ -1022,7 +1038,7 @@ Aceptamos: Efectivo, tarjeta, transferencia."></textarea>
         <div style="display:flex;justify-content:flex-end;margin-top:10px">
           <button class="btn primary" onclick="saveKnowledgeBase()" id="save-kb-btn"><i class="ti ti-device-floppy"></i>Guardar base de conocimiento</button>
         </div>
-        <div style="font-size:12px;color:var(--text3);margin-top:8px">Máximo recomendado: 2000 caracteres para mejor rendimiento.</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:8px">Máximo recomendado: 8000 caracteres. O texto importado é adicionado automaticamente.</div>
       </div>
       <div class="card" style="margin-bottom:16px">
         <div style="font-size:13px;color:var(--text2);margin-bottom:12px">
