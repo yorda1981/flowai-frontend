@@ -134,3 +134,58 @@ async function cancelSubscription() {
     loadPlanStatus();
   }
 }
+
+// ── Upload de documento para base de conhecimento ──────────────────────────
+
+async function uploadKnowledgeDoc(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const MAX_MB = 10;
+  if (file.size > MAX_MB * 1024 * 1024) {
+    showToast(`❌ Arquivo muito grande. Máximo ${MAX_MB}MB`);
+    input.value = '';
+    return;
+  }
+
+  const btn    = document.getElementById('upload-doc-btn');
+  const status = document.getElementById('upload-doc-status');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader-2"></i> Processando...';
+  if (status) { status.style.display = 'none'; }
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch(`${API}/api/config/upload-doc`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + TOKEN },
+      body: formData
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showToast(`✅ "${data.filename}" importado — ${data.chars.toLocaleString()} caracteres extraídos`);
+      if (status) {
+        status.style.display = 'block';
+        status.innerHTML = `
+          <div style="background:var(--green-light);border:1px solid var(--green);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--green)">
+            <strong>✓ ${data.filename}</strong> — ${data.chars.toLocaleString()} caracteres adicionados à base de conhecimento
+            ${data.truncated ? ' <span style="opacity:.7">(truncado em 8.000 chars)</span>' : ''}
+            <div style="margin-top:6px;color:var(--text2);font-family:monospace;font-size:11px;background:var(--surface);padding:6px;border-radius:4px;line-height:1.4">${data.preview}</div>
+          </div>`;
+      }
+      // Atualizar textarea com novo conteúdo
+      loadKnowledgeBase();
+    } else {
+      showToast('❌ ' + (data.error || 'Erro ao processar arquivo'));
+    }
+  } catch(e) {
+    showToast('❌ Erro ao enviar arquivo');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-upload"></i> Importar arquivo';
+  input.value = '';
+}
